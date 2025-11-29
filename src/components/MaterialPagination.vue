@@ -23,7 +23,7 @@ const props = defineProps({
 
 const emit = defineEmits(["change", "pageSizeChange"])
 const styles = useCssModule()
-const pageSizeOptions = [10, 20, 50, 100]
+const pageSizeOptions = [20, 50, 100, 500]
 
 const paginationClasses = computed(() => {
   const colorClass = props.color ? `pagination-${props.color}` : ""
@@ -139,10 +139,13 @@ const handleItemClick = (item) => {
 
 const handlePageSizeChange = ({ target }) => {
   if (!target) {
-    return
+    return pageSizeOptions[0]
   }
 
   const pageSize = Number(target.value)
+  if (!pageSizeOptions.includes(pageSize)) {
+    return pageSizeOptions[0]
+  }
   emit("pageSizeChange", pageSize)
 }
 </script>

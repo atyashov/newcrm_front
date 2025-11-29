@@ -21,7 +21,7 @@ const requestError = ref("")
 const requestSuccess = ref("")
 const editingClientId = ref(null)
 const editingClientSnapshot = ref(null)
-const pageSize = ref(10)
+const pageSize = ref(20)
 
 const paginationMeta = ref({
   current_page: 1,
@@ -293,16 +293,28 @@ onMounted(() => getList(currentPage.value, pageSize.value))
       </p>
       <ul v-else class="list-group">
         <li
+          class="list-group-item d-flex justify-content-between align-items-center"
+        >
+          <span class="list-group-item-label">ФИО</span
+          ><span class="list-group-item-label">Телефон</span
+          ><span class="list-group-item-label">Email</span>
+          <span class="list-group-item-label"></span>
+        </li>
+        <li
           v-for="client in individuals"
           :key="client.id ?? client.email ?? client.name"
           class="list-group-item d-flex justify-content-between align-items-center"
         >
-          <div class="d-flex flex-column">
-            <p class="mb-1 fw-bold">{{ client.name ?? "Без имени" }}</p>
-            <small class="text-muted">
-              {{ client.phone ?? "Телефон не указан" }} •
-              {{ client.email ?? "Email не указан" }}
-            </small>
+          <div
+            class="d-flex flex-row justify-content-around w-100 gap-2 align-items-center"
+          >
+            <span class="list-item">{{ client.name ?? "Без имени" }}</span>
+            <span class="list-item">{{
+              client.phone ?? "Телефон не указан"
+            }}</span>
+            <span class="list-item">{{
+              client.email ?? "Email не указан"
+            }}</span>
           </div>
           <div class="d-flex align-items-center gap-2">
             <MaterialButton
