@@ -1,14 +1,20 @@
-import { createRouter, createWebHistory } from "vue-router";
-import Dashboard from "../views/Dashboard.vue";
-import Tables from "../views/Tables.vue";
-import Billing from "../views/Billing.vue";
-import RTL from "../views/Rtl.vue";
-import Notifications from "../views/Notifications.vue";
-import Profile from "../views/Profile.vue";
-import SignIn from "../views/SignIn.vue";
-import SignUp from "../views/SignUp.vue";
-import CreateOutlay from "../views/CreateOutlay.vue";
-import Individuals from "../views/Individuals.vue";
+import { createRouter, createWebHistory } from "vue-router"
+import Dashboard from "../views/Dashboard.vue"
+import Tables from "../views/Tables.vue"
+import Billing from "../views/Billing.vue"
+import RTL from "../views/Rtl.vue"
+import Notifications from "../views/Notifications.vue"
+import Profile from "../views/Profile.vue"
+import SignIn from "../views/SignIn.vue"
+import SignUp from "../views/SignUp.vue"
+import CreateOutlay from "../views/CreateOutlay.vue"
+import Individuals from "../views/Individuals.vue"
+import LegalEntities from "../views/LegalEntities.vue"
+import ClientTypes from "../views/ClientTypes.vue"
+import Roles from "../views/Roles.vue"
+import Menus from "../views/Menus.vue"
+import Products from "../views/Products.vue"
+import FetchProductsFromSite from "../views/FetchProductsFromSite.vue"
 
 const routes = [
   {
@@ -24,11 +30,27 @@ const routes = [
   {
     path: "/individuals",
     name: "Физические лица",
-    component: Individuals
+    component: Individuals,
   },
   {
     path: "/legal-entity",
-    name: "Юридические лица"
+    name: "Юридические лица",
+    component: LegalEntities,
+  },
+  {
+    path: "/client-types",
+    name: "Типы контрагентов",
+    component: ClientTypes,
+  },
+  {
+    path: "/roles",
+    name: "Роли",
+    component: Roles,
+  },
+  {
+    path: "/menu-access",
+    name: "Меню",
+    component: Menus,
   },
   {
     path: "/tables",
@@ -68,14 +90,24 @@ const routes = [
   {
     path: "/create-outlay",
     name: "Создать смету",
-    component: CreateOutlay
+    component: CreateOutlay,
   },
-];
+  {
+    path: "/products",
+    name: "Products",
+    component: Products,
+  },
+  {
+    path: "/load-products",
+    name: "Загрузить товары с сайта",
+    component: FetchProductsFromSite,
+  },
+]
 
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   routes,
   linkActiveClass: "active",
-});
+})
 
-export default router;
+export default router

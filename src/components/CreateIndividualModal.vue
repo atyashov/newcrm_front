@@ -51,7 +51,7 @@ const clientLoadError = ref("")
 const isClientLoading = ref(false)
 const invalidFields = ref(new Set())
 const isEditMode = computed(
-  () => props.clientId !== null && props.clientId !== undefined
+  () => props.clientId !== null && props.clientId !== undefined,
 )
 
 const isFormDisabled = computed(() => props.isSaving || isClientLoading.value)
@@ -179,7 +179,7 @@ watch(
     if (value && isEditMode.value && props.isOpen) {
       applyClientData(value)
     }
-  }
+  },
 )
 
 watch(
@@ -197,7 +197,7 @@ watch(
     } else {
       resetForm()
     }
-  }
+  },
 )
 
 watch(
@@ -225,7 +225,7 @@ watch(
     if (!isEditMode.value) {
       resetForm()
     }
-  }
+  },
 )
 </script>
 <template>

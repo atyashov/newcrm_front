@@ -1,4 +1,5 @@
 import axios from "axios"
+import { showSuccess, showError } from "@/utils/notification"
 
 export const API = process.env.VUE_APP_API_URL
 export const TOKEN_USER_NAME = process.env.VUE_APP_STORAGE_NAME ?? "user-token"
@@ -21,87 +22,66 @@ export const apiGet = async (url, params) => {
     window.location = "/"
   }
   if (res.data.message) {
-    // notification[res.data.status]({
-    //     message: res.data.message,
-    //     description: res.data.description,
-    //     placement:'bottomRight'
-    // });
-    // notify({
-    //     title: res.data.message,
-    //     type:res.data.status
-    // });
     console.log("message", res.data.message)
   }
 
   return res.data
+}
+
+const handleMutatingRequest = async (requestFn, url, data, options = {}) => {
+  try {
+    const requestConfig = {
+      ...config,
+      ...options,
+      headers: {
+        ...config.headers,
+        ...(options.headers ?? {}),
+      },
+    }
+
+    const requestArgs =
+      data === undefined
+        ? [`${API}/${url}`, requestConfig]
+        : [`${API}/${url}`, data, requestConfig]
+
+    const res = await requestFn(...requestArgs)
+    const responseData = res.data
+
+    // Проверяем, пометил ли сервер ответ как ошибку
+    if (responseData.status === false || responseData.error) {
+      const message =
+        responseData.error || responseData.message || "Произошла ошибка"
+      showError(message)
+      return responseData
+    }
+
+    // Успешный ответ (HTTP 2xx и нет флага ошибки)
+    const message = responseData.message || "Операция выполнена успешно"
+    showSuccess(message)
+    return responseData
+  } catch (error) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.response?.data?.error ||
+      error.message ||
+      "Сетевая ошибка"
+    showError(errorMessage)
+    throw error
+  }
 }
 
 export const apiPost = async (url, data) => {
-  let res = await axios.post(`${API}/${url}`, data, config)
+  return handleMutatingRequest(axios.post, url, data)
+}
 
-  if (res.data.message) {
-    // notify({
-    //     title: res.data.message,
-    //     type:res.data.status
-    // });
-    // notification[res.data.status]({
-    //     message: res.data.message,
-    //     description: res.data.description,
-    //     placement:'bottomRight'
-    // });
-    console.log("message", res.data.message)
-  }
-  if (res.data.error_fields) {
-    var labels = document.getElementsByTagName("LABEL")
-    for (var i = 0; i < labels.length; i++) {
-      labels[i].classList.remove("error")
-      if (labels[i].htmlFor !== "") {
-        var elem = document.getElementById(labels[i].htmlFor)
-        if (elem) elem.label = labels[i]
-      }
-    }
-
-    res.data.error_fields.forEach((inputId) => {
-      let elem = document.getElementById(inputId)
-      if (elem && elem.label) {
-        console.log(elem.label)
-        elem.label.classList.add("error")
-      }
-    })
-  }
-
-  return res.data
+export const apiPatch = async (url, data) => {
+  return handleMutatingRequest(axios.patch, url, data)
 }
 
 export const apiPut = async (url, data) => {
-  let res = await axios.put(`${API}/${url}`, data, config)
-
-  if (res.data.message) {
-    console.log("message", res.data.message)
-  }
-  if (res.data.error_fields) {
-    var labels = document.getElementsByTagName("LABEL")
-    for (var i = 0; i < labels.length; i++) {
-      labels[i].classList.remove("error")
-      if (labels[i].htmlFor !== "") {
-        var elem = document.getElementById(labels[i].htmlFor)
-        if (elem) elem.label = labels[i]
-      }
-    }
-
-    res.data.error_fields.forEach((inputId) => {
-      let elem = document.getElementById(inputId)
-      if (elem && elem.label) {
-        console.log(elem.label)
-        elem.label.classList.add("error")
-      }
-    })
-  }
-
-  return res.data
+  return handleMutatingRequest(axios.put, url, data)
 }
 
-export const apiDelete = async (url) => {
-  let res = await axios.delete(`${API}/${url}`, config)
-  return res.data
+export const apiDelete = async (url, options = {}) => {
+  return handleMutatingRequest(axios.delete, url, undefined, options)
 }

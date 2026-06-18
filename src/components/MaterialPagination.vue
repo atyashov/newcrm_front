@@ -25,6 +25,25 @@ const emit = defineEmits(["change", "pageSizeChange"])
 const styles = useCssModule()
 const pageSizeOptions = [20, 50, 100, 500]
 
+const selectedPageSize = computed({
+  get: () => {
+    const pageSize = Number(props.pagination?.per_page)
+
+    return pageSizeOptions.includes(pageSize)
+      ? String(pageSize)
+      : String(pageSizeOptions[0])
+  },
+  set: (value) => {
+    const pageSize = Number(value)
+
+    if (!pageSizeOptions.includes(pageSize)) {
+      return
+    }
+
+    emit("pageSizeChange", pageSize)
+  },
+})
+
 const paginationClasses = computed(() => {
   const colorClass = props.color ? `pagination-${props.color}` : ""
   const sizeClass = props.size ? `pagination-${props.size}` : ""
@@ -137,17 +156,6 @@ const handleItemClick = (item) => {
   handleChange(item.value)
 }
 
-const handlePageSizeChange = ({ target }) => {
-  if (!target) {
-    return pageSizeOptions[0]
-  }
-
-  const pageSize = Number(target.value)
-  if (!pageSizeOptions.includes(pageSize)) {
-    return pageSizeOptions[0]
-  }
-  emit("pageSizeChange", pageSize)
-}
 </script>
 
 <template>
@@ -175,10 +183,13 @@ const handlePageSizeChange = ({ target }) => {
     <select
       class="form-select"
       :class="styles.pageSize"
-      :value="props.pagination?.per_page ?? pageSizeOptions[0]"
-      @change="handlePageSizeChange"
+      v-model="selectedPageSize"
     >
-      <option v-for="option in pageSizeOptions" :key="option" :value="option">
+      <option
+        v-for="option in pageSizeOptions"
+        :key="option"
+        :value="String(option)"
+      >
         {{ option }}
       </option>
     </select>

@@ -1,82 +1,85 @@
 <template>
   <div
     class="input-group"
-    :class="`input-group-${variant} ${getStatus(error, success)}`"
+    :class="`input-group-${props.variant} ${statusClass}`"
   >
     <textarea
-      :id="id"
+      :id="props.id"
       class="form-control"
-      :rows="rows"
-      :name="name"
-      :value="value"
-      :placeholder="placeholder"
-      :isRequired="isRequired"
-      :disabled="disabled"
+      :rows="props.rows"
+      :name="props.name"
+      :value="props.value"
+      :placeholder="props.placeholder"
+      :required="props.isRequired"
+      :disabled="props.disabled"
+      @input="handleInput"
     ></textarea>
   </div>
 </template>
 
-<script>
-import setMaterialInput from "@/assets/js/material-input.js";
+<script setup>
+import { computed, onMounted } from "vue"
+import setMaterialInput from "@/assets/js/material-input.js"
 
-export default {
-  name: "MaterialTextarea",
-  props: {
-    variant: {
-      type: String,
-      default: "outline",
-    },
-    id: {
-      type: String,
-      required: true,
-    },
-    name: {
-      type: String,
-      default: "",
-    },
-    value: {
-      type: String,
-      default: "",
-    },
-    placeholder: {
-      type: String,
-      default: "Your text here...",
-    },
-    isRequired: Boolean,
-    disabled: {
-      type: Boolean,
-      default: false,
-    },
-    rows: {
-      type: Number,
-      default: 5,
-    },
-    success: {
-      type: Boolean,
-      default: false,
-    },
-    error: {
-      type: Boolean,
-      default: false,
-    },
+const props = defineProps({
+  variant: {
+    type: String,
+    default: "outline",
   },
-  mounted() {
-    setMaterialInput();
+  id: {
+    type: String,
+    required: true,
   },
-  methods: {
-    getStatus: (error, success) => {
-      let isValidValue;
+  name: {
+    type: String,
+    default: "",
+  },
+  value: {
+    type: String,
+    default: "",
+  },
+  placeholder: {
+    type: String,
+    default: "Your text here...",
+  },
+  isRequired: Boolean,
+  disabled: {
+    type: Boolean,
+    default: false,
+  },
+  rows: {
+    type: Number,
+    default: 5,
+  },
+  success: {
+    type: Boolean,
+    default: false,
+  },
+  error: {
+    type: Boolean,
+    default: false,
+  },
+})
 
-      if (success) {
-        isValidValue = "is-valid";
-      } else if (error) {
-        isValidValue = "is-invalid";
-      } else {
-        isValidValue = null;
-      }
+const emit = defineEmits(["update:value"])
 
-      return isValidValue;
-    },
-  },
-};
+const statusClass = computed(() => {
+  if (props.success) {
+    return "is-valid"
+  }
+
+  if (props.error) {
+    return "is-invalid"
+  }
+
+  return ""
+})
+
+const handleInput = (event) => {
+  emit("update:value", event.target.value)
+}
+
+onMounted(() => {
+  setMaterialInput()
+})
 </script>

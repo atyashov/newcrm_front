@@ -51,7 +51,7 @@ const handleEmitValues = () => {
   <div :class="styles.filter">
     <template v-for="input in inputOptions" :key="input.name">
       <MaterialInput
-        v-if="input.type === 'text'"
+        v-if="['text', 'date'].includes(input.type)"
         :id="input.name"
         :value="filterValues[input.name] ?? ''"
         :label="input.placeholder"

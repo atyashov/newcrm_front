@@ -1,6 +1,6 @@
 <script setup>
-import { apiGet, apiDelete } from "@/api"
-import { computed, onMounted, ref, useCssModule } from "vue"
+import { apiDelete } from "@/api"
+import { onMounted, ref, useCssModule } from "vue"
 import MaterialButton from "@/components/MaterialButton.vue"
 import MaterialPagination from "@/components/MaterialPagination.vue"
 import CreateIndividualModal from "@/components/CreateIndividualModal.vue"
@@ -10,92 +10,65 @@ import {
   createIndividual as createIndividualRequest,
   updateIndividual as updateIndividualRequest,
 } from "@/services/individualsService"
+import { useSorting } from "@/views/components/useSorting"
+import { useFiltering } from "@/views/components/useFiltering"
+import { usePagination } from "@/views/components/usePagination"
+import { useDataList } from "@/views/components/useDataList"
+import { useModal } from "@/views/components/useModal"
+import { buildQueryParams } from "@/views/components/buildQueryParams"
 
 const styles = useCssModule()
 
-const individuals = ref([])
-const isCreateModalVisible = ref(false)
+// Composables
+const { sortState, toggleSort, getSortIcon, getSortParam } = useSorting()
+const { filterState, updateFilters, getFilterParams } = useFiltering()
+const {
+  pageSize,
+  paginationMeta,
+  currentPage,
+  totalPages,
+  updatePaginationMeta,
+  canGoToPage,
+  changePageSize,
+  resetToFirstPage,
+} = usePagination(20)
+const {
+  items: individuals,
+  isLoading,
+  requestError,
+  requestSuccess,
+  loadData,
+  showSuccess,
+  showError,
+  clearMessages,
+} = useDataList(fetchIndividuals)
+const {
+  isOpen: isCreateModalVisible,
+  editingId: editingClientId,
+  editingData: editingClientSnapshot,
+  open: openModal,
+  close: closeModal,
+} = useModal()
+
 const isSaving = ref(false)
-const isLoading = ref(false)
-const requestError = ref("")
-const requestSuccess = ref("")
-const editingClientId = ref(null)
-const editingClientSnapshot = ref(null)
-const pageSize = ref(20)
-
-const paginationMeta = ref({
-  current_page: 1,
-  last_page: 1,
-  per_page: pageSize.value,
-  total: 0,
-  prev_page_url: null,
-  next_page_url: null,
-  links: [],
-})
-
-const currentPage = computed(
-  () => Number(paginationMeta.value.current_page ?? 1) || 1
-)
-
-const totalPages = computed(() => {
-  const meta = paginationMeta.value
-  if (meta.last_page !== undefined) {
-    const numeric = Number(meta.last_page)
-    if (Number.isFinite(numeric) && numeric > 0) {
-      return numeric
-    }
-  }
-
-  if (meta.total && meta.per_page) {
-    const total = Number(meta.total)
-    const perPage = Number(meta.per_page)
-    if (Number.isFinite(total) && Number.isFinite(perPage) && perPage > 0) {
-      return Math.max(1, Math.ceil(total / perPage))
-    }
-  }
-
-  return 1
-})
 
 const getList = async (page = 1, perPage = pageSize.value) => {
-  try {
-    isLoading.value = true
-    requestError.value = ""
-    const { data, pagination } = await fetchIndividuals({
-      page,
-      page_size: perPage,
-    })
+  const params = buildQueryParams({
+    page,
+    perPage,
+    filters: getFilterParams(),
+    sort: getSortParam(),
+  })
 
-    individuals.value = Array.isArray(data) ? data : []
-
-    paginationMeta.value = {
-      current_page:
-        Number(pagination?.current_page ?? page) > 0
-          ? Number(pagination?.current_page ?? page)
-          : page,
-      last_page: Number(pagination?.last_page ?? pagination?.total_pages) || 1,
-      per_page: Number(pagination?.per_page ?? perPage) || perPage,
-      total: Number(pagination?.total ?? individuals.value.length) || 0,
-      prev_page_url: pagination?.prev_page_url ?? null,
-      next_page_url: pagination?.next_page_url ?? null,
-      links: Array.isArray(pagination?.links) ? pagination.links : [],
+  await loadData(params, (response) => {
+    if (response?.pagination) {
+      updatePaginationMeta(response.pagination, page, perPage)
     }
-  } catch (error) {
-    console.error("Не удалось получить список клиентов", error)
-    requestError.value =
-      "Не удалось загрузить список клиентов. Попробуйте позже."
-  } finally {
-    isLoading.value = false
-  }
+  })
 }
 
 const goToPage = async (page) => {
-  if (
-    page < 1 ||
-    page > totalPages.value ||
-    page === currentPage.value ||
-    isLoading.value
-  ) {
+  if (!canGoToPage(page, isLoading.value)) {
     return
   }
 
@@ -103,21 +76,17 @@ const goToPage = async (page) => {
 }
 
 const handlePageSizeChange = async (newSize) => {
-  const nextSize = Number(newSize)
-
-  if (!Number.isFinite(nextSize) || nextSize <= 0) {
+  const nextSize = changePageSize(newSize)
+  if (!nextSize) {
     return
   }
 
-  pageSize.value = nextSize
   await getList(1, nextSize)
 }
 
 const handleOpenCreateModal = () => {
-  requestError.value = ""
-  editingClientId.value = null
-  editingClientSnapshot.value = null
-  isCreateModalVisible.value = true
+  clearMessages()
+  openModal()
 }
 
 const handleEditClient = (client) => {
@@ -125,38 +94,32 @@ const handleEditClient = (client) => {
     return
   }
 
-  requestError.value = ""
-  editingClientId.value = client.id ?? null
-  editingClientSnapshot.value = client ? { ...client } : null
-  isCreateModalVisible.value = true
+  clearMessages()
+  openModal(client.id ?? null, client)
 }
 
 const handleDeleteClient = async (client) => {
   if (!client || !confirm("Вы уверены, что хотите удалить клиента?")) {
     return
   }
+
   isLoading.value = true
   const data = await apiDelete(`admin/individuals/${client.id}`)
+  isLoading.value = false
+
   if (data.status === true) {
     individuals.value = individuals.value.filter(
-      (item) => item.id !== client.id
+      (item) => item.id !== client.id,
     )
-    isLoading.value = false
-    requestSuccess.value = `Клиент ${client.name} успешно удален.`
-    setTimeout(() => {
-      requestSuccess.value = ""
-    }, 3000)
+    showSuccess(`Клиент ${client.name} успешно удален.`)
     return
   }
-  requestError.value =
-    data.message ?? "Не удалось удалить клиента. Попробуйте позже."
-  isLoading.value = false
+
+  showError(data.message ?? "Не удалось удалить клиента. Попробуйте позже.")
 }
 
 const handleCloseModal = () => {
-  isCreateModalVisible.value = false
-  editingClientId.value = null
-  editingClientSnapshot.value = null
+  closeModal()
 }
 
 const handleModalSubmit = async ({ mode, payload, id }) => {
@@ -166,7 +129,7 @@ const handleModalSubmit = async ({ mode, payload, id }) => {
 
   try {
     isSaving.value = true
-    requestError.value = ""
+    clearMessages()
 
     const isEditMode = mode === "edit" && id
     const response = isEditMode
@@ -184,16 +147,18 @@ const handleModalSubmit = async ({ mode, payload, id }) => {
       return
     }
 
-    requestError.value =
+    showError(
       response?.message ??
-      (isEditMode
-        ? "Не удалось обновить клиента. Проверьте данные."
-        : "Не удалось создать клиента. Проверьте данные.")
+        (isEditMode
+          ? "Не удалось обновить клиента. Проверьте данные."
+          : "Не удалось создать клиента. Проверьте данные."),
+    )
   } catch (error) {
     console.error("Ошибка при сохранении клиента", error)
-    requestError.value =
+    showError(
       error?.response?.data?.message ??
-      "Произошла ошибка. Попробуйте повторить позже."
+        "Произошла ошибка. Попробуйте повторить позже.",
+    )
   } finally {
     isSaving.value = false
   }
@@ -223,38 +188,17 @@ const inputOptions = [
 ]
 
 const handleFilterChange = async (input) => {
-  const params = new URLSearchParams()
-  Object.entries(input).forEach(([key, value]) => {
-    if (value) {
-      params.append(key, value)
-    }
-  })
-  console.log(params.toString())
-  isLoading.value = true
-
-  try {
-    // Фильтрация по нескольким полям, включая пагинацию
-    const response = await apiGet(`admin/individuals?${params.toString()}`)
-    individuals.value = Array.isArray(response.data.items.data)
-      ? response.data.items.data
-      : []
-    paginationMeta.value = {
-      current_page: response.data.items.current_page,
-      last_page: response.data.items.last_page,
-      per_page: response.data.items.per_page,
-      total: response.data.items.total,
-    }
-  } catch (error) {
-    console.error("Ошибка при фильтрации клиентов", error)
-    requestError.value =
-      error?.response?.data?.message ??
-      "Произошла ошибка. Измените параметры фильтра."
-  } finally {
-    isLoading.value = false
-  }
+  updateFilters(input)
+  resetToFirstPage()
+  await getList(1, pageSize.value)
 }
 
-onMounted(() => getList(currentPage.value, pageSize.value))
+const handleSort = (field) => {
+  toggleSort(field)
+  getList(currentPage.value, pageSize.value)
+}
+
+onMounted(() => getList(1, pageSize.value))
 </script>
 
 <template>
@@ -264,7 +208,11 @@ onMounted(() => getList(currentPage.value, pageSize.value))
         <h1 :class="styles.title">Физические лица</h1>
         <p :class="styles.subtitle">Управление клиентами</p>
       </div>
-      <MaterialButton color="success" @click="handleOpenCreateModal">
+      <MaterialButton
+        color="success"
+        variant="outline"
+        @click="handleOpenCreateModal"
+      >
         Создать клиента
       </MaterialButton>
     </header>
@@ -288,17 +236,64 @@ onMounted(() => getList(currentPage.value, pageSize.value))
     </div>
 
     <div v-else>
-      <p v-if="!individuals.length" class="text-muted">
-        Список пуст. Добавьте первого клиента.
-      </p>
+      <p v-if="!individuals.length" class="text-muted">Ничего не найдено.</p>
       <ul v-else class="list-group">
         <li
-          class="list-group-item d-flex justify-content-between align-items-center"
+          class="list-group-item list-group-header d-flex justify-content-between align-items-center"
         >
-          <span class="list-group-item-label">ФИО</span
-          ><span class="list-group-item-label">Телефон</span
-          ><span class="list-group-item-label">Email</span>
-          <span class="list-group-item-label"></span>
+          <span
+            class="list-group-item-label d-flex align-items-center gap-1"
+            style="cursor: pointer"
+            @click="handleSort('name')"
+          >
+            ФИО
+            <i
+              v-if="getSortIcon('name')"
+              class="material-icons"
+              style="font-size: 1rem"
+              >{{ getSortIcon("name") }}</i
+            >
+          </span>
+          <span
+            class="list-group-item-label d-flex align-items-center gap-1"
+            style="cursor: pointer"
+            @click="handleSort('phone')"
+          >
+            Телефон
+            <i
+              v-if="getSortIcon('phone')"
+              class="material-icons"
+              style="font-size: 1rem"
+              >{{ getSortIcon("phone") }}</i
+            >
+          </span>
+          <span
+            class="list-group-item-label d-flex align-items-center gap-1"
+            style="cursor: pointer"
+            @click="handleSort('email')"
+          >
+            Email
+            <i
+              v-if="getSortIcon('email')"
+              class="material-icons"
+              style="font-size: 1rem"
+              >{{ getSortIcon("email") }}</i
+            >
+          </span>
+          <span
+            class="list-group-item-label d-flex align-items-center gap-1"
+            style="cursor: pointer"
+            @click="handleSort('address')"
+          >
+            Адрес
+            <i
+              v-if="getSortIcon('address')"
+              class="material-icons"
+              style="font-size: 1rem"
+              >{{ getSortIcon("address") }}</i
+            >
+          </span>
+          <span class="list-group-item-label manage"></span>
         </li>
         <li
           v-for="client in individuals"
@@ -315,8 +310,11 @@ onMounted(() => getList(currentPage.value, pageSize.value))
             <span class="list-item">{{
               client.email ?? "Email не указан"
             }}</span>
+            <span class="list-item">{{
+              client.address ?? "Адрес не указан"
+            }}</span>
           </div>
-          <div class="d-flex align-items-center gap-2">
+          <div class="d-flex align-items-center gap-2 manage">
             <MaterialButton
               color="info"
               variant="outline"
@@ -393,10 +391,6 @@ onMounted(() => getList(currentPage.value, pageSize.value))
 .subtitle {
   margin: 0.25rem 0 0;
   color: #6c757d;
-}
-
-.buttonIcon {
-  font-size: 1.4rem !important;
 }
 
 .paginationWrapper {

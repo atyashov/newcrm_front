@@ -5,6 +5,36 @@
   box-shadow: inset 0 1px #4caf50 !important;
 }
 
+.fm {
+  margin: 1rem;
+}
+
+.fm,
+.fm-table thead th {
+  background-color: inherit !important;
+}
+
+.dark-version {
+  .fm-tree-branch li > p:hover,
+  .fm-tree-branch li > p.selected,
+  .fm-tree-branch li > p:hover,
+  .fm-table tr:hover,
+  .fm-tree .fm-tree-disk,
+  .breadcrumb.active-manager,
+  .fm-grid-item:hover,
+  .fm-grid-item.active {
+    background-color: #343e5c !important;
+  }
+  .table-info {
+    --bs-table-bg: #343e5c;
+  }
+
+  .fm-grid-item:hover,
+  .fm-grid-item.active {
+    box-shadow: 3px 2px 5px #343e5c !important;
+  }
+}
+
 .modal-content {
   z-index: 9999;
 }
@@ -19,11 +49,13 @@
   background-position: right 5px center !important;
 }
 
-.page-item .page-link,
-.page-item span {
-  border-radius: 0.375rem !important;
-  width: 40px !important;
-  height: 40px !important;
+.page-item {
+  &.page-link,
+  span {
+    border-radius: 0.375rem !important;
+    width: 40px !important;
+    height: 40px !important;
+  }
 }
 
 .page-item.active .page-link span {
@@ -31,8 +63,12 @@
 }
 
 .list-item {
-  width: 100% !important;
+  width: 100%;
   font-size: 0.875rem !important;
+
+  .badge {
+    margin: 0 0.25rem 0.25rem;
+  }
 }
 
 .btn.btn-sm {
@@ -43,4 +79,258 @@
 .btn.btn-sm i,
 .btn-group-sm > .btn i {
   font-size: 0.75rem !important;
+}
+
+.list-group-header {
+  background-color: #f0f0f0 !important;
+  font-weight: bold !important;
+  font-size: 0.875rem !important;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.125) !important;
+}
+
+.list-group-item {
+  padding: 0.25rem 0.5rem !important;
+  &-label {
+    width: 100%;
+  }
+  .manage {
+    width: 50px;
+  }
+}
+
+.navbar-vertical.navbar-expand-xs {
+  overflow: hidden;
+}
+
+.navbar .nav-link {
+  font-size: 0.75rem;
+}
+
+.navbar-vertical.navbar-expand-xs .navbar-nav .nav-link {
+  padding: 0.25rem 1rem;
+}
+
+// НЕ ТРОГАТЬ!
+.navbar-vertical {
+  .nav-item {
+    &:hover {
+      .nav-link {
+        background-color: inherit;
+      }
+      background-color: inherit;
+      > .nav-link {
+        background-color: $navbar-vertical-hover-bg-color !important;
+      }
+    }
+  }
+}
+///
+header {
+  margin-bottom: 1.5rem;
+  h1 {
+    font-size: 1.75rem;
+  }
+}
+
+.buttonIcon {
+  font-size: 1.4rem !important;
+}
+
+.toast-header,
+.toast-body {
+  padding: 0.25rem;
+}
+
+.tabs {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem;
+  background: $gray-200;
+  border-radius: $border-radius-xl;
+  border: 1px solid $gray-300;
+  margin: 10px 0;
+}
+
+.tab {
+  border: none;
+  background: transparent;
+  color: $font-color;
+  padding: 0.7rem 1.1rem;
+  border-radius: $border-radius-lg;
+  font-size: 0.95rem;
+  font-weight: $font-weight-bold;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+
+  &:hover {
+    background: rgba($white, 0.75);
+    color: $h-color;
+  }
+}
+
+.tab-active,
+.tabActive {
+  background: $white;
+  color: $h-color;
+  box-shadow: $box-shadow-sm;
+}
+
+.multiselect {
+  min-height: 40px;
+  font-size: 0.875rem;
+
+  .multiselect-wrapper {
+    min-height: 40px;
+    border: 1px solid $gray-300;
+    border-radius: $border-radius-lg;
+    background: $white;
+    box-shadow: none;
+    padding: 0.2rem 0.75rem;
+  }
+
+  &.is-active {
+    .multiselect-wrapper {
+      border-color: $success;
+      box-shadow: 0 0 0 0.125rem rgba($success, 0.15);
+    }
+  }
+
+  .multiselect-search,
+  .multiselect-single-label,
+  .multiselect-placeholder,
+  .multiselect-option,
+  .multiselect-no-options,
+  .multiselect-no-results {
+    font-size: 0.875rem;
+  }
+
+  .multiselect-search,
+  .multiselect-single-label,
+  .multiselect-single-label-text {
+    color: $font-color;
+  }
+
+  .multiselect-placeholder {
+    color: $secondary;
+  }
+
+  .multiselect-caret,
+  .multiselect-clear {
+    color: $text-muted;
+  }
+
+  .multiselect-dropdown {
+    border: 1px solid $gray-300;
+    border-radius: $border-radius-lg;
+    background: $white;
+    box-shadow: $box-shadow-lg;
+    z-index: 10001;
+  }
+
+  .multiselect-option.is-pointed {
+    background: rgba($success, 0.08);
+    color: $h-color;
+  }
+
+  .multiselect-option.is-selected {
+    background: rgba($success, 0.16);
+    color: $h-color;
+    font-weight: $font-weight-bold;
+  }
+
+  .multiselect-option.is-selected.is-pointed {
+    background: rgba($success, 0.22);
+  }
+}
+
+body.dark-version {
+  .tabs {
+    background: $dark-version-card-bg-color;
+    border-color: $dark-version-border-color;
+  }
+
+  .tab {
+    color: $dark-version-body-color;
+
+    &:hover {
+      background: rgba($white, 0.08);
+      color: $white;
+    }
+  }
+
+  .tab-active,
+  .tabActive {
+    background: rgba($white, 0.12);
+    color: $white;
+    box-shadow: none;
+  }
+
+  .modal-content {
+    background: $dark-version-card-bg-color;
+  }
+
+  .input-group.input-group-outline .form-control,
+  .form-select {
+    color: $white;
+    option {
+      background: $dark-version-card-bg-color;
+    }
+  }
+
+  .multiselect {
+    .multiselect-wrapper {
+      background: $dark-version-card-bg-color;
+      border-color: $dark-version-border-color;
+    }
+
+    .multiselect-search,
+    .multiselect-tags-search,
+    .multiselect-tags-search-copy,
+    .multiselect-single-label,
+    .multiselect-placeholder {
+      background: $dark-version-card-bg-color !important;
+    }
+
+    &.is-active {
+      .multiselect-wrapper {
+        border-color: $success;
+        box-shadow: 0 0 0 0.125rem rgba($success, 0.2);
+      }
+    }
+
+    .multiselect-search,
+    .multiselect-single-label,
+    .multiselect-single-label-text,
+    .multiselect-placeholder,
+    .multiselect-caret,
+    .multiselect-clear,
+    .multiselect-no-options,
+    .multiselect-no-results {
+      color: $white;
+    }
+
+    .multiselect-dropdown {
+      background: $dark-version-card-bg-color;
+      border-color: $dark-version-border-color;
+    }
+
+    .multiselect-option {
+      color: $white;
+    }
+
+    .multiselect-option.is-pointed {
+      background: rgba($white, 0.08);
+    }
+
+    .multiselect-option.is-selected {
+      background: rgba($success, 0.25);
+      color: $white;
+    }
+  }
 }

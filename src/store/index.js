@@ -1,5 +1,7 @@
-import { createStore } from "vuex";
-import user from './modules/user.js';
+import { createStore } from "vuex"
+import user from "./modules/user.js"
+import menu from "./modules/menu.js"
+import subdivisions from "./modules/subdivisions.js"
 
 export default createStore({
   state: {
@@ -23,45 +25,47 @@ export default createStore({
   },
   mutations: {
     toggleConfigurator(state) {
-      state.showConfig = !state.showConfig;
+      state.showConfig = !state.showConfig
     },
     navbarMinimize(state) {
-      const sidenav_show = document.querySelector(".g-sidenav-show");
+      const sidenav_show = document.querySelector(".g-sidenav-show")
 
       if (sidenav_show.classList.contains("g-sidenav-pinned")) {
-        sidenav_show.classList.remove("g-sidenav-pinned");
-        state.isPinned = true;
+        sidenav_show.classList.remove("g-sidenav-pinned")
+        state.isPinned = true
       } else {
-        sidenav_show.classList.add("g-sidenav-pinned");
-        state.isPinned = false;
+        sidenav_show.classList.add("g-sidenav-pinned")
+        state.isPinned = false
       }
     },
     navbarFixed(state) {
       if (state.isNavFixed === false) {
-        state.isNavFixed = true;
+        state.isNavFixed = true
       } else {
-        state.isNavFixed = false;
+        state.isNavFixed = false
       }
     },
     toggleEveryDisplay(state) {
-      state.showNavbar = !state.showNavbar;
-      state.showSidenav = !state.showSidenav;
-      state.showFooter = !state.showFooter;
+      state.showNavbar = !state.showNavbar
+      state.showSidenav = !state.showSidenav
+      state.showFooter = !state.showFooter
     },
     toggleHideConfig(state) {
-      state.hideConfigButton = !state.hideConfigButton;
+      state.hideConfigButton = !state.hideConfigButton
     },
     color(state, payload) {
-      state.color = payload;
+      state.color = payload
     },
   },
   actions: {
     setColor({ commit }, payload) {
-      commit("color", payload);
+      commit("color", payload)
     },
   },
   getters: {},
   modules: {
-    user
-  }
-});
+    user,
+    menu,
+    subdivisions,
+  },
+})
