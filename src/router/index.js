@@ -8,6 +8,7 @@ import Profile from "../views/Profile.vue"
 import SignIn from "../views/SignIn.vue"
 import SignUp from "../views/SignUp.vue"
 import CreateOutlay from "../views/CreateOutlay.vue"
+import OutlayInfo from "../views/OutlayInfo.vue"
 import Individuals from "../views/Individuals.vue"
 import LegalEntities from "../views/LegalEntities.vue"
 import ClientTypes from "../views/ClientTypes.vue"
@@ -15,8 +16,33 @@ import Roles from "../views/Roles.vue"
 import Menus from "../views/Menus.vue"
 import Products from "../views/Products.vue"
 import FetchProductsFromSite from "../views/FetchProductsFromSite.vue"
+import PaymentMethods from "../views/PaymentMethods.vue"
+import Stores from "../views/Stores.vue"
+import ExpenseGroups from "../views/ExpenseGroups.vue"
+import Cashes from "../views/Cashes.vue"
+import OutlayGroupNames from "../views/OutlayGroupNames.vue"
+import OutlayStatuses from "../views/OutlayStatuses.vue"
+import Users from "../views/Users.vue"
+import Subdivisions from "../views/Subdivisions.vue"
 
 const routes = [
+  { path: "/users", name: "Пользователи", component: Users },
+  { path: "/subdivisions", name: "Подразделения", component: Subdivisions },
+  {
+    path: "/outlay-statuses",
+    name: "Статусы смет",
+    component: OutlayStatuses,
+  },
+  {
+    path: "/outlay-groups",
+    name: "Группы товаров в смете",
+    component: OutlayGroupNames,
+  },
+  {
+    path: "/outlay-group-names",
+    alias: ["/outlay-group-name"],
+    redirect: "/outlay-groups",
+  },
   {
     path: "/",
     name: "/",
@@ -88,10 +114,22 @@ const routes = [
     component: SignUp,
   },
   {
-    path: "/create-outlay",
+    path: "/outlays",
+    alias: ["/my-outlays"],
+    redirect: "/dashboard",
+  },
+  {
+    path: "/outlays/create",
+    alias: ["/create-outlay"],
     name: "Создать смету",
     component: CreateOutlay,
   },
+  {
+    path: "/outlays/:id/edit",
+    name: "Редактировать смету",
+    component: CreateOutlay,
+  },
+  { path: "/outlays/:id/info", name: "Информация о смете", component: OutlayInfo },
   {
     path: "/products",
     name: "Products",
@@ -101,6 +139,27 @@ const routes = [
     path: "/load-products",
     name: "Загрузить товары с сайта",
     component: FetchProductsFromSite,
+  },
+  {
+    path: "/payment-methods",
+    name: "Способы оплаты",
+    component: PaymentMethods,
+  },
+  {
+    path: "/stores",
+    name: "Склады",
+    component: Stores,
+  },
+  {
+    path: "/expense-groups",
+    alias: ["/consumption-group", "/consumption-groups"],
+    name: "Группы расходов",
+    component: ExpenseGroups,
+  },
+  {
+    path: "/cashes",
+    name: "Кассы",
+    component: Cashes,
   },
 ]
 

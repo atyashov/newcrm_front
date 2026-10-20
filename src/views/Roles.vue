@@ -1,4 +1,5 @@
 <script setup>
+import AppList from "@/components/AppList.vue"
 import { apiDelete } from "@/api"
 import { onMounted, ref, useCssModule } from "vue"
 import { useSorting } from "@/views/components/useSorting"
@@ -8,6 +9,7 @@ import { useDataList } from "@/views/components/useDataList"
 import { useModal } from "@/views/components/useModal"
 import MaterialButton from "@/components/MaterialButton.vue"
 import MaterialPagination from "@/components/MaterialPagination.vue"
+import TableSummary from "@/components/TableSummary.vue"
 import { buildQueryParams } from "@/views/components/buildQueryParams"
 import Filter from "@/views/components/Filter.vue"
 import CreateRoleModal from "../components/CreateRoleModal.vue"
@@ -190,6 +192,11 @@ const handleSort = (field) => {
 }
 
 onMounted(() => getList(1, pageSize.value))
+const listColumns = [
+  { key: "title", label: "Название", sortable: true, fallback: "Без названия" },
+  { key: "created_at", label: "Создано", sortable: true },
+  { key: "updated_at", label: "Обновлено", sortable: true },
+]
 </script>
 
 <template>
@@ -221,94 +228,10 @@ onMounted(() => getList(1, pageSize.value))
     </div>
 
     <div v-else>
+      <TableSummary class="mb-2" :pagination="paginationMeta" />
       <p v-if="!roles.length" class="text-muted">Ничего не найдено.</p>
-      <ul v-else class="list-group">
-        <li
-          class="list-group-item list-group-header d-flex justify-content-between align-items-center"
-        >
-          <span
-            class="list-group-item-label d-flex align-items-center gap-1"
-            style="cursor: pointer"
-            @click="handleSort('title')"
-          >
-            Название
-            <i
-              v-if="getSortIcon('title')"
-              class="material-icons"
-              style="font-size: 1rem"
-              >{{ getSortIcon("title") }}</i
-            >
-          </span>
-          <span
-            class="list-group-item-label d-flex align-items-center gap-1"
-            style="cursor: pointer"
-            @click="handleSort('created_at')"
-          >
-            Создано
-            <i
-              v-if="getSortIcon('created_at')"
-              class="material-icons"
-              style="font-size: 1rem"
-              >{{ getSortIcon("created_at") }}</i
-            >
-          </span>
-          <span
-            class="list-group-item-label d-flex align-items-center gap-1"
-            style="cursor: pointer"
-            @click="handleSort('updated_at')"
-          >
-            Обновлено
-            <i
-              v-if="getSortIcon('updated_at')"
-              class="material-icons"
-              style="font-size: 1rem"
-              >{{ getSortIcon("updated_at") }}</i
-            >
-          </span>
-          <span class="list-group-item-label manage"></span>
-        </li>
-        <li
-          v-for="role in roles"
-          :key="role.id ?? role.alias"
-          class="list-group-item d-flex justify-content-between align-items-center"
-        >
-          <div
-            class="d-flex flex-row justify-content-around w-100 gap-2 align-items-center"
-          >
-            <span class="list-item">{{ role.title ?? "Без названия" }}</span>
-            <span class="list-item">{{ role.created_at ?? "-" }}</span>
-            <span class="list-item">{{ role.updated_at ?? "-" }}</span>
-          </div>
-          <div class="d-flex align-items-center gap-2">
-            <MaterialButton
-              color="info"
-              variant="outline"
-              size="sm"
-              class="d-inline-flex align-items-center gap-1"
-              @click="handleEditRole(role)"
-            >
-              <i
-                :class="[styles.buttonIcon, 'material-icons']"
-                aria-hidden="true"
-                >edit</i
-              >
-            </MaterialButton>
-            <MaterialButton
-              color="danger"
-              variant="outline"
-              size="sm"
-              class="d-inline-flex align-items-center gap-1"
-              @click="handleDeleteRole(role)"
-            >
-              <i
-                :class="[styles.buttonIcon, 'material-icons']"
-                aria-hidden="true"
-                >delete</i
-              >
-            </MaterialButton>
-          </div>
-        </li>
-      </ul>
+      <AppList v-else :items="roles" :columns="listColumns" :get-sort-icon="getSortIcon"
+        @sort="handleSort" @edit="handleEditRole" @delete="handleDeleteRole" />
       <div class="row">
         <div class="col-12">
           <MaterialPagination
@@ -355,10 +278,6 @@ onMounted(() => getList(1, pageSize.value))
 .subtitle {
   margin: 0.25rem 0 0;
   color: #6c757d;
-}
-
-.buttonIcon {
-  font-size: 1.4rem !important;
 }
 
 .paginationWrapper {

@@ -17,6 +17,8 @@ const getMenuIcon = (path) => {
     "legal-entity": "contacts",
     products: "article",
     roles: "rule",
+    users: "people",
+    subdivisions: "business",
     "menu-access": "rule",
     "product-groups": "article",
     "managers-analitycs": "analytics",
@@ -25,12 +27,16 @@ const getMenuIcon = (path) => {
     "categories-analitycs": "analytics",
     "storage-analitycs": "analytics",
     storages: "article",
+    stores: "warehouse",
     "client-sources": "article",
     "payment-methods": "article",
     "order-subjects": "article",
     "outlay-statuses": "article",
     "outlay-groups": "article",
+    "outlay-group-names": "article",
+    "outlay-group-name": "article",
     "consumption-groups": "article",
+    "expense-groups": "article",
     "partner-types": "article",
     documents: "article",
     "outlay-group-templates": "article",
@@ -45,6 +51,7 @@ const getMenuIcon = (path) => {
 }
 const iconText = computed(() => {
   const menu = props.menu
+  if (menu.title?.trim() === "Справочники") return "menu_book"
   if (menu.children && menu.children.length > 0 && menu.children[0].path) {
     return getMenuIcon(menu.children[0].path)
   }

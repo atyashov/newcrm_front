@@ -44,7 +44,7 @@ const handleClick = (event) => {
 
 <template>
   <li class="page-item" :class="itemClasses">
-    <a class="page-link" href="#" @click.prevent="handleClick">
+    <a class="page-link" href="#" :aria-current="active ? 'page' : undefined" :aria-disabled="disabled || undefined" :tabindex="disabled ? -1 : 0" :aria-label="prev ? 'Предыдущая страница' : next ? 'Следующая страница' : undefined" @click.prevent="handleClick">
       <span v-if="!(prev || next)">{{ props.label }}</span>
       <i v-else-if="props.prev" class="fa fa-angle-left"></i>
       <i v-else class="fa fa-angle-right"></i>

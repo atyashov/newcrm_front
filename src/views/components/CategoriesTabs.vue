@@ -1,8 +1,9 @@
 <script setup>
+import AppList from "@/components/AppList.vue"
 import { apiDelete } from "@/api"
 import { computed, onMounted, ref, useCssModule, watch } from "vue"
-import MaterialButton from "@/components/MaterialButton.vue"
 import MaterialPagination from "@/components/MaterialPagination.vue"
+import TableSummary from "@/components/TableSummary.vue"
 import Filter from "@/views/components/Filter.vue"
 import { fetchCategories } from "@/services/productsService"
 import { useSorting } from "@/views/components/useSorting"
@@ -217,6 +218,10 @@ onMounted(async () => {
 defineExpose({
   refresh,
 })
+const listColumns = [
+  { key: "title", label: "Название", sortable: true },
+  { key: "parent", label: "Родительская категория", format: resolveParentTitle },
+]
 </script>
 
 <template>
@@ -240,70 +245,12 @@ defineExpose({
     </div>
 
     <div v-else>
+      <TableSummary class="mb-2" :pagination="paginationMeta" />
       <p v-if="!categories.length" class="text-muted">
         Список категорий пуст. Добавьте первую категорию.
       </p>
-      <ul v-else class="list-group">
-        <li
-          class="list-group-item list-group-header d-flex justify-content-between align-items-center"
-        >
-          <span
-            class="list-group-item-label d-flex align-items-center gap-1"
-            style="cursor: pointer"
-            @click="handleSort('title')"
-          >
-            Название
-            <i
-              v-if="getSortIcon('title')"
-              class="material-icons"
-              style="font-size: 1rem"
-              >{{ getSortIcon("title") }}</i
-            >
-          </span>
-          <span class="list-group-item-label">Родительская категория</span>
-          <span class="list-group-item-label manage"></span>
-        </li>
-        <li
-          v-for="category in categories"
-          :key="category.id"
-          class="list-group-item d-flex justify-content-between align-items-center"
-        >
-          <div
-            class="d-flex flex-row justify-content-around w-100 gap-2 align-items-center"
-          >
-            <span class="list-item">{{ category.title ?? "Не указано" }}</span>
-            <span class="list-item">{{ resolveParentTitle(category) }}</span>
-          </div>
-          <div class="d-flex align-items-center gap-2">
-            <MaterialButton
-              color="info"
-              variant="outline"
-              size="sm"
-              class="d-inline-flex align-items-center gap-1"
-              @click="emit('edit-category', category)"
-            >
-              <i
-                :class="[styles.buttonIcon, 'material-icons']"
-                aria-hidden="true"
-                >edit
-              </i>
-            </MaterialButton>
-            <MaterialButton
-              color="danger"
-              variant="outline"
-              size="sm"
-              class="d-inline-flex align-items-center gap-1"
-              @click="handleDeleteCategory(category)"
-            >
-              <i
-                :class="[styles.buttonIcon, 'material-icons']"
-                aria-hidden="true"
-                >delete</i
-              >
-            </MaterialButton>
-          </div>
-        </li>
-      </ul>
+      <AppList v-else :items="categories" :columns="listColumns" :get-sort-icon="getSortIcon"
+        @sort="handleSort" @edit="emit('edit-category', $event)" @delete="handleDeleteCategory" />
       <div class="row">
         <div class="col-12">
           <MaterialPagination
@@ -321,10 +268,6 @@ defineExpose({
 </template>
 
 <style module lang="scss">
-.buttonIcon {
-  font-size: 1.4rem !important;
-}
-
 .paginationWrapper {
   margin: 15px 0;
 }

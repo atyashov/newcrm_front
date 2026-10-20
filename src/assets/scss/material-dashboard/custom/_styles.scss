@@ -1,8 +1,154 @@
+p {
+  margin-bottom: 0 !important;
+  line-height: 1.25rem !important;
+}
+
+summary {
+  margin-bottom: 10px;
+}
+
 .input-group.input-group-outline.is-focused .form-label:before,
 .input-group.input-group-outline.is-focused .form-label:after,
 .input-group.input-group-outline.is-filled .form-label:before,
 .input-group.input-group-outline.is-filled .form-label:after {
   box-shadow: inset 0 1px #4caf50 !important;
+}
+
+.account-dropdown {
+  position: absolute;
+  top: calc(100% + 0.75rem);
+  right: 0;
+  z-index: 1050;
+  width: 260px;
+  max-width: calc(100vw - 2rem);
+  padding: 1rem;
+  background: $white;
+  color: $font-color;
+  border: 1px solid $gray-300;
+  border-radius: $border-radius-md;
+  box-shadow: $box-shadow;
+  overflow-wrap: anywhere;
+  p {
+    margin: 0.35rem 0 0.75rem;
+    font-size: 0.875rem;
+  }
+}
+.material-pagination {
+  color: $font-color;
+  .page-link span {
+    color: inherit;
+  }
+  .page-item.active .page-link {
+    color: $white;
+  }
+}
+body.dark-version {
+  .account-dropdown {
+    background: $dark-version-card-bg-color;
+    color: $dark-version-body-color;
+    border-color: $dark-version-border-color;
+  }
+  .material-pagination {
+    color: $dark-version-body-color;
+    .page-item:not(.active) .page-link {
+      background: $dark-version-card-bg-color;
+      border-color: $dark-version-border-color;
+      color: $dark-version-body-color;
+    }
+    .page-item:not(.active):not(.disabled) .page-link:hover,
+    .page-item:not(.active):not(.disabled) .page-link:focus {
+      background: rgba($white, 0.1);
+      border-color: $success;
+    }
+    .page-item.disabled .page-link {
+      opacity: 0.45;
+    }
+    .form-select {
+      background-color: $dark-version-card-bg-color;
+      color: $dark-version-body-color;
+      border-color: $dark-version-border-color;
+      color-scheme: dark;
+    }
+  }
+}
+
+.cash-summary {
+  --cash-primary: #{$primary};
+  --cash-danger: #{$danger};
+  --cash-label: #{$white};
+}
+
+.outlay-form-page .multiselect.is-invalid,
+.directory-form .multiselect.is-invalid {
+  border-color: $danger !important;
+  .multiselect-wrapper {
+    border-color: $danger !important;
+    box-shadow: 0 0 0 1px $danger !important;
+  }
+}
+
+.rich-text-editor {
+  --editor-bg: #{$white};
+  --editor-text: #{$font-color};
+  --editor-border: #{$gray-300};
+  --editor-muted: #{$gray-600};
+  color: var(--editor-text);
+  background: var(--editor-bg);
+  border: 1px solid var(--editor-border);
+  border-radius: 0.5rem;
+
+  .ql-toolbar.ql-snow,
+  .ql-container.ql-snow {
+    border: 0;
+    font: inherit;
+  }
+  .ql-toolbar.ql-snow {
+    border-bottom: 1px solid var(--editor-border);
+    padding: 5px;
+  }
+  .rich-text-editor-content {
+    min-height: 110px;
+    font-size: 0.875rem;
+  }
+  .ql-editor {
+    min-height: 110px;
+    max-height: 320px;
+    padding: 0.5rem;
+    color: var(--editor-text);
+  }
+  .ql-editor.ql-blank::before {
+    color: var(--editor-muted);
+    font-style: normal;
+  }
+  .ql-snow .ql-stroke {
+    stroke: var(--editor-text);
+  }
+  .ql-snow .ql-fill {
+    fill: var(--editor-text);
+  }
+  .ql-snow .ql-tooltip {
+    background: var(--editor-bg);
+    color: var(--editor-text);
+    border-color: var(--editor-border);
+    z-index: 10;
+  }
+  .ql-tooltip input {
+    background: var(--editor-bg);
+    color: var(--editor-text);
+  }
+  &.is-invalid {
+    border-color: $danger;
+  }
+  &.is-disabled .ql-toolbar {
+    pointer-events: none;
+    opacity: 0.5;
+  }
+}
+body.dark-version .rich-text-editor {
+  --editor-bg: #{$dark-version-card-bg-color};
+  --editor-text: #{$dark-version-body-color};
+  --editor-border: #{$dark-version-border-color};
+  --editor-muted: #{$dark-version-table-color};
 }
 
 .fm {
@@ -98,6 +244,10 @@
   }
 }
 
+nav#navbarBlur {
+  padding: 16px !important;
+}
+
 .navbar-vertical.navbar-expand-xs {
   overflow: hidden;
 }
@@ -181,17 +331,31 @@ header {
   box-shadow: $box-shadow-sm;
 }
 
+.input-group.input-group-outline .form-control {
+  padding: 0.5rem 0.5rem 0.6rem !important;
+}
+
+.input-group.input-group-outline.is-focused .form-label + .form-control,
+.input-group.input-group-outline.is-filled .form-label + .form-control {
+  box-shadow:
+    inset 0.5px 0 $success,
+    inset -0.5px 0 $success,
+    inset 0 -0.5px $success;
+}
+
 .multiselect {
-  min-height: 40px;
+  --ms-font-size: 0.875rem;
+  --ms-px: 0.5rem;
+  min-height: 38px;
   font-size: 0.875rem;
 
   .multiselect-wrapper {
-    min-height: 40px;
+    min-height: 38px;
     border: 1px solid $gray-300;
-    border-radius: $border-radius-lg;
+    border-radius: 0.5rem;
     background: $white;
     box-shadow: none;
-    padding: 0.2rem 0.75rem;
+    padding: 0.2rem 0.5rem;
   }
 
   &.is-active {
@@ -333,4 +497,42 @@ body.dark-version {
       color: $white;
     }
   }
+}
+
+.outlays-page, .outlay-info-page, .public-outlay-page, .outlay-form-page {
+  --outlay-surface: #{$white};
+  --outlay-heading: #{$gray-100};
+  --outlay-border: #{$gray-300};
+  --outlay-text: #{$font-color};
+  --outlay-muted: #{$text-muted};
+}
+
+body.dark-version .outlays-page, body.dark-version .outlay-info-page, body.dark-version .public-outlay-page, body.dark-version .outlay-form-page {
+  --outlay-surface: #{$dark-version-card-bg-color};
+  --outlay-heading: #{$dark-version-card-bg-color};
+  --outlay-border: #{$dark-version-border-color};
+  --outlay-text: #{$dark-version-body-color};
+  --outlay-muted: #{$dark-version-table-color};
+}
+
+.expense-groups-page {
+  --expense-groups-surface-color: #{$white};
+  --expense-groups-children-color: #{rgba($gray-200, 0.35)};
+  --expense-groups-border-color: #{$gray-300};
+  --expense-groups-title-color: #{$h-color};
+  --expense-groups-text-color: #{$font-color};
+  --expense-groups-muted-color: #{$text-muted};
+  --expense-groups-accent-color: #{$success};
+  --expense-groups-hover-color: #{rgba($success, 0.06)};
+}
+
+body.dark-version .expense-groups-page {
+  --expense-groups-surface-color: #{$dark-version-card-bg-color};
+  --expense-groups-children-color: #{rgba($white, 0.025)};
+  --expense-groups-border-color: #{$dark-version-border-color};
+  --expense-groups-title-color: #{$white};
+  --expense-groups-text-color: #{$dark-version-body-color};
+  --expense-groups-muted-color: #{$dark-version-table-color};
+  --expense-groups-accent-color: #{$success};
+  --expense-groups-hover-color: #{rgba($white, 0.06)};
 }

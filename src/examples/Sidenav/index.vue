@@ -14,18 +14,11 @@
       ></i>
       <a class="m-0 navbar-brand" href="/">
         <img
-          :src="
-            sidebarType === 'bg-white' ||
-            (sidebarType === 'bg-transparent' && !isDarkMode)
-              ? logoDark
-              : logo
-          "
-          class="navbar-brand-img h-100"
-          alt="main_logo"
+          :src="logo"
+          class="navbar-brand-img brand-logo"
+          :class="{ 'brand-logo-light': sidebarType === 'bg-gradient-dark' || isDarkMode }"
+          alt="Впрокат ЦРМ"
         />
-        <span class="ms-2 font-weight-bold text-white"
-          >Впрокат ЦРМ</span
-        >
       </a>
     </div>
     <hr class="horizontal light mt-0 mb-2" />
@@ -34,8 +27,6 @@
 </template>
 <script>
 import SidenavList from "./SidenavList.vue";
-import logo from "@/assets/img/logo-ct.png";
-import logoDark from "@/assets/img/logo-ct-dark.png";
 import { mapState } from "vuex";
 
 export default {
@@ -45,8 +36,7 @@ export default {
   },
   data() {
     return {
-      logo,
-      logoDark,
+      logo: `${process.env.BASE_URL}wprokat_logo_new_black.png`,
     };
   },
   computed: {
@@ -54,3 +44,8 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.sidenav-header .brand-logo { width: 100%; max-height: 46px; object-fit: contain; }
+.brand-logo-light { filter: invert(1); }
+</style>

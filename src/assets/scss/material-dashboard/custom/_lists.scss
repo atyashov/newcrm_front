@@ -1,0 +1,94 @@
+// Shared directory/list presentation. Dashboard does not opt into these classes.
+.app-list {
+  --app-list-text: #{$body-color};
+  --app-list-border: #{$list-group-border-color};
+  --app-list-bg: #{$list-group-bg};
+  --app-list-heading-bg: #{$gray-200};
+  color: var(--app-list-text);
+  font-size: .875rem;
+  line-height: 1.5;
+}
+
+body.dark-version .app-list {
+  --app-list-text: #{$dark-version-body-color};
+  --app-list-border: var(--app-list-text);
+  --app-list-bg: transparent;
+  --app-list-heading-bg: transparent;
+}
+
+.app-list-frame {
+  border: 1px solid var(--app-list-border);
+  border-radius: $list-group-border-radius;
+  background: var(--app-list-bg);
+  overflow: hidden;
+}
+.app-list-scroll { overflow-x: auto; }
+.app-list-table {
+  width: 100%;
+  min-width: calc(var(--app-list-column-count) * 8rem + 4rem);
+  border-collapse: collapse;
+  color: inherit;
+  font: inherit;
+  margin: 0;
+  th, td {
+    padding: .25rem .5rem;
+    text-align: left;
+    vertical-align: middle;
+    color: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    overflow-wrap: anywhere;
+  }
+  th {
+    font-weight: 700;
+    background: var(--app-list-heading-bg);
+    border-bottom: 2px solid var(--app-list-border);
+  }
+  td { font-weight: 400; }
+  tbody tr + tr td { border-top: 1px solid var(--app-list-border); }
+  p { margin: 0; font: inherit; color: inherit; }
+  .badge { margin: 0 .25rem .25rem 0; }
+  .app-list-action-cell { width: 1%; white-space: nowrap; }
+}
+.app-list-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: .25rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  .material-icons { font-size: 1rem; }
+}
+.app-list-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-shrink: 0;
+  gap: .5rem;
+  .btn.btn-sm {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 22px;
+    width: 22px;
+    height: 22px;
+    min-height: 0;
+    padding: .25rem !important;
+    border-radius: .25rem !important;
+    margin: 0;
+    line-height: 1;
+    .material-icons { font-size: .75rem !important; }
+  }
+}
+.app-list-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
+  padding: .25rem .5rem;
+  font: inherit;
+  color: inherit;
+}

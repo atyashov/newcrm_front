@@ -79,10 +79,13 @@ export const usePagination = (initialPageSize = 20) => {
       last_page: Number(pagination?.last_page ?? pagination?.total_pages) || 1,
       per_page: Number(pagination?.per_page ?? fallbackPerPage) || fallbackPerPage,
       total: Number(pagination?.total ?? 0) || 0,
+      from: pagination?.from ?? null,
+      to: pagination?.to ?? null,
       prev_page_url: pagination?.prev_page_url ?? null,
       next_page_url: pagination?.next_page_url ?? null,
       links: Array.isArray(pagination?.links) ? pagination.links : [],
     }
+    pageSize.value = paginationMeta.value.per_page
   }
 
   /**

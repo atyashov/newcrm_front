@@ -8,6 +8,8 @@ defineProps({
 })
 
 const store = useStore()
+const isDarkMode = computed(() => store.state.isDarkMode)
+const isRTL = computed(() => store.state.isRTL)
 
 // Получаем меню из состояния
 
@@ -29,6 +31,21 @@ onMounted(() => {
   >
     <ul class="navbar-nav">
       <menu-item v-for="menu in treeMenus" :key="menu.id" :menu="menu" />
+      <li class="nav-item">
+        <button
+          type="button"
+          class="nav-link theme-toggle border-0 bg-transparent"
+          :aria-label="isDarkMode ? 'Включить светлую тему' : 'Включить тёмную тему'"
+          :title="isDarkMode ? 'Включить светлую тему' : 'Включить тёмную тему'"
+          :aria-pressed="isDarkMode"
+          @click="store.dispatch('toggleTheme')"
+        >
+          <div class="text-center d-flex align-items-center justify-content-center" :class="isRTL ? 'ms-2' : 'me-2'">
+            <i class="material-icons-round opacity-10 fs-5" aria-hidden="true">{{ isDarkMode ? "light_mode" : "dark_mode" }}</i>
+          </div>
+          <span class="nav-link-text" :class="isRTL ? 'me-1' : 'ms-1'">{{ isDarkMode ? "Светлая тема" : "Тёмная тема" }}</span>
+        </button>
+      </li>
       <!-- <li class="nav-item">
         <sidenav-collapse
           url="#"
@@ -104,3 +121,7 @@ onMounted(() => {
     </div>
   </div>
 </template>
+
+<style scoped>
+.theme-toggle { width: calc(100% - 2rem); text-align: start; }
+</style>

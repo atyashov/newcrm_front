@@ -10,8 +10,14 @@ const emptyPagination = {
   links: [],
 }
 
+// Products and categories currently use the legacy pageSize query parameter.
+const listParams = (params = {}) => {
+  const { page_size, per_page, pageSize, ...rest } = params
+  return { ...rest, pageSize: Number(page_size ?? per_page ?? pageSize) || 20 }
+}
+
 export const fetchProducts = async (params) => {
-  const response = await apiGet("admin/products", params)
+  const response = await apiGet("admin/products", listParams(params))
 
   if (response?.status !== true) {
     return {
@@ -29,12 +35,20 @@ export const fetchProducts = async (params) => {
       last_page: items.last_page ?? emptyPagination.last_page,
       per_page: items.per_page ?? emptyPagination.per_page,
       total: items.total ?? emptyPagination.total,
+      from: items.from ?? null,
+      to: items.to ?? null,
       prev_page_url: items.prev_page_url ?? emptyPagination.prev_page_url,
       next_page_url: items.next_page_url ?? emptyPagination.next_page_url,
       links: items.links ?? emptyPagination.links,
     },
   }
 }
+
+export const fetchProductsFromSite = async (params) =>
+  apiGet("admin/products/simple", params)
+
+export const fetchProductAvailability = (params) =>
+  apiPost("admin/products/availability", params, { notify: false })
 
 export const fetchProductById = async (id, params = null) => {
   const response = params
@@ -55,8 +69,9 @@ export const updateProduct = async (id, payload) =>
   apiPut(`admin/products/${id}`, payload)
 
 export const fetchCategories = async (params) => {
-  const response = await apiGet("admin/categories", params)
-  const fallbackPerPage = Number(params?.page_size) || 20
+  const query = listParams(params)
+  const response = await apiGet("admin/categories", query)
+  const fallbackPerPage = query.pageSize
 
   if (response?.status !== true) {
     return {
@@ -86,6 +101,8 @@ export const fetchCategories = async (params) => {
         ? items.per_page ?? fallbackPerPage
         : fallbackPerPage,
       total: isPaginatedItems ? items.total ?? data.length : data.length,
+      from: isPaginatedItems ? items.from ?? null : null,
+      to: isPaginatedItems ? items.to ?? null : null,
       prev_page_url: isPaginatedItems
         ? items.prev_page_url ?? emptyPagination.prev_page_url
         : emptyPagination.prev_page_url,

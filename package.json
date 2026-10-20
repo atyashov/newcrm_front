@@ -27,6 +27,7 @@
     "chart.js": "4.4.0",
     "core-js": "3.33.0",
     "laravel-file-manager": "^3.1.1",
+    "quill": "^2.0.3",
     "vite": "^7.1.4",
     "vite-plugin-html": "^3.2.2",
     "vite-plugin-vue-devtools": "^8.0.1",

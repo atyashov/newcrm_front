@@ -1,8 +1,10 @@
 <script setup>
+import AppList from "@/components/AppList.vue"
 import { apiDelete } from "@/api"
 import { onMounted, ref, useCssModule } from "vue"
 import MaterialButton from "@/components/MaterialButton.vue"
 import MaterialPagination from "@/components/MaterialPagination.vue"
+import TableSummary from "@/components/TableSummary.vue"
 import CreateIndividualModal from "@/components/CreateIndividualModal.vue"
 import Filter from "@/views/components/Filter.vue"
 import {
@@ -199,6 +201,12 @@ const handleSort = (field) => {
 }
 
 onMounted(() => getList(1, pageSize.value))
+const listColumns = [
+  { key: "name", label: "ФИО", sortable: true, fallback: "Без имени" },
+  { key: "phone", label: "Телефон", sortable: true, fallback: "Телефон не указан" },
+  { key: "email", label: "Email", sortable: true, fallback: "Email не указан" },
+  { key: "address", label: "Адрес", sortable: true, fallback: "Адрес не указан" },
+]
 </script>
 
 <template>
@@ -236,114 +244,10 @@ onMounted(() => getList(1, pageSize.value))
     </div>
 
     <div v-else>
+      <TableSummary class="mb-2" :pagination="paginationMeta" />
       <p v-if="!individuals.length" class="text-muted">Ничего не найдено.</p>
-      <ul v-else class="list-group">
-        <li
-          class="list-group-item list-group-header d-flex justify-content-between align-items-center"
-        >
-          <span
-            class="list-group-item-label d-flex align-items-center gap-1"
-            style="cursor: pointer"
-            @click="handleSort('name')"
-          >
-            ФИО
-            <i
-              v-if="getSortIcon('name')"
-              class="material-icons"
-              style="font-size: 1rem"
-              >{{ getSortIcon("name") }}</i
-            >
-          </span>
-          <span
-            class="list-group-item-label d-flex align-items-center gap-1"
-            style="cursor: pointer"
-            @click="handleSort('phone')"
-          >
-            Телефон
-            <i
-              v-if="getSortIcon('phone')"
-              class="material-icons"
-              style="font-size: 1rem"
-              >{{ getSortIcon("phone") }}</i
-            >
-          </span>
-          <span
-            class="list-group-item-label d-flex align-items-center gap-1"
-            style="cursor: pointer"
-            @click="handleSort('email')"
-          >
-            Email
-            <i
-              v-if="getSortIcon('email')"
-              class="material-icons"
-              style="font-size: 1rem"
-              >{{ getSortIcon("email") }}</i
-            >
-          </span>
-          <span
-            class="list-group-item-label d-flex align-items-center gap-1"
-            style="cursor: pointer"
-            @click="handleSort('address')"
-          >
-            Адрес
-            <i
-              v-if="getSortIcon('address')"
-              class="material-icons"
-              style="font-size: 1rem"
-              >{{ getSortIcon("address") }}</i
-            >
-          </span>
-          <span class="list-group-item-label manage"></span>
-        </li>
-        <li
-          v-for="client in individuals"
-          :key="client.id ?? client.email ?? client.name"
-          class="list-group-item d-flex justify-content-between align-items-center"
-        >
-          <div
-            class="d-flex flex-row justify-content-around w-100 gap-2 align-items-center"
-          >
-            <span class="list-item">{{ client.name ?? "Без имени" }}</span>
-            <span class="list-item">{{
-              client.phone ?? "Телефон не указан"
-            }}</span>
-            <span class="list-item">{{
-              client.email ?? "Email не указан"
-            }}</span>
-            <span class="list-item">{{
-              client.address ?? "Адрес не указан"
-            }}</span>
-          </div>
-          <div class="d-flex align-items-center gap-2 manage">
-            <MaterialButton
-              color="info"
-              variant="outline"
-              size="sm"
-              class="d-inline-flex align-items-center gap-1"
-              @click="handleEditClient(client)"
-            >
-              <i
-                :class="[styles.buttonIcon, 'material-icons']"
-                aria-hidden="true"
-                >edit</i
-              >
-            </MaterialButton>
-            <MaterialButton
-              color="danger"
-              variant="outline"
-              size="sm"
-              class="d-inline-flex align-items-center gap-1"
-              @click="handleDeleteClient(client)"
-            >
-              <i
-                :class="[styles.buttonIcon, 'material-icons']"
-                aria-hidden="true"
-                >delete</i
-              >
-            </MaterialButton>
-          </div>
-        </li>
-      </ul>
+      <AppList v-else :items="individuals" :columns="listColumns" :get-sort-icon="getSortIcon"
+        @sort="handleSort" @edit="handleEditClient" @delete="handleDeleteClient" />
       <div class="row">
         <div class="col-12">
           <MaterialPagination

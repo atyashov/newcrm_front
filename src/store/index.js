@@ -24,6 +24,12 @@ export default createStore({
     absolute: "position-absolute px-4 mx-0 w-100 z-index-2",
   },
   mutations: {
+    setDarkMode(state, value) {
+      state.isDarkMode = Boolean(value)
+      document.body.classList.toggle("dark-version", state.isDarkMode)
+      const secure = window.location.protocol === "https:" ? "; Secure" : ""
+      document.cookie = `crm_theme=${state.isDarkMode ? "dark" : "light"}; Path=/; Max-Age=31536000; SameSite=Lax${secure}`
+    },
     toggleConfigurator(state) {
       state.showConfig = !state.showConfig
     },
@@ -58,6 +64,14 @@ export default createStore({
     },
   },
   actions: {
+    initTheme({ commit }) {
+      const theme = document.cookie.split(";").map((cookie) => cookie.trim())
+        .find((cookie) => cookie.startsWith("crm_theme="))?.split("=")[1]
+      commit("setDarkMode", theme === "dark")
+    },
+    toggleTheme({ state, commit }) {
+      commit("setDarkMode", !state.isDarkMode)
+    },
     setColor({ commit }, payload) {
       commit("color", payload)
     },

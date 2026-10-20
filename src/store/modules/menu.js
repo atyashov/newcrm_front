@@ -44,7 +44,11 @@ const actions = {
 
 const mutations = {
   setMenus(state, menus) {
-    state.menus = menus // Мутация для обновления меню
+    state.menus = menus.map((item) =>
+      ["consumption-group", "consumption-groups"].includes(item.path)
+        ? { ...item, path: "expense-groups" }
+        : item,
+    )
   },
 }
 

@@ -1,8 +1,10 @@
 <script setup>
+import AppList from "@/components/AppList.vue"
 import { apiDelete } from "@/api"
 import { onMounted, ref, useCssModule } from "vue"
 import MaterialButton from "@/components/MaterialButton.vue"
 import MaterialPagination from "@/components/MaterialPagination.vue"
+import TableSummary from "@/components/TableSummary.vue"
 import CreateLegalEntityModal from "@/components/CreateLegalEntityModal.vue"
 import Filter from "@/views/components/Filter.vue"
 import {
@@ -210,6 +212,13 @@ const handleSort = (field) => {
 }
 
 onMounted(() => getList(1, pageSize.value))
+const listColumns = [
+  { key: "contact_name", label: "Контактное лицо", sortable: true, fallback: "Не указано" },
+  { key: "organization_name", label: "Организация", sortable: true, fallback: "Не указано" },
+  { key: "phone", label: "Телефон", sortable: true, fallback: "Телефон не указан" },
+  { key: "email", label: "Email", sortable: true, fallback: "Email не указан" },
+  { key: "legal_address", label: "Адрес", sortable: true, fallback: "Адрес не указан" },
+]
 </script>
 
 <template>
@@ -243,134 +252,12 @@ onMounted(() => getList(1, pageSize.value))
     </div>
 
     <div v-else>
+      <TableSummary class="mb-2" :pagination="paginationMeta" />
       <p v-if="!legalEntities.length" class="text-muted">
         Список пуст. Добавьте первое юридическое лицо.
       </p>
-      <ul v-else class="list-group">
-        <li
-          class="list-group-item list-group-header d-flex justify-content-between align-items-center"
-        >
-          <span
-            class="list-group-item-label d-flex align-items-center gap-1"
-            style="cursor: pointer"
-            @click="handleSort('contact_name')"
-          >
-            Контактное лицо
-            <i
-              v-if="getSortIcon('contact_name')"
-              class="material-icons"
-              style="font-size: 1rem"
-              >{{ getSortIcon("contact_name") }}</i
-            >
-          </span>
-          <span
-            class="list-group-item-label d-flex align-items-center gap-1"
-            style="cursor: pointer"
-            @click="handleSort('organization_name')"
-          >
-            Организация
-            <i
-              v-if="getSortIcon('organization_name')"
-              class="material-icons"
-              style="font-size: 1rem"
-              >{{ getSortIcon("organization_name") }}</i
-            >
-          </span>
-          <span
-            class="list-group-item-label d-flex align-items-center gap-1"
-            style="cursor: pointer"
-            @click="handleSort('phone')"
-          >
-            Телефон
-            <i
-              v-if="getSortIcon('phone')"
-              class="material-icons"
-              style="font-size: 1rem"
-              >{{ getSortIcon("phone") }}</i
-            >
-          </span>
-          <span
-            class="list-group-item-label d-flex align-items-center gap-1"
-            style="cursor: pointer"
-            @click="handleSort('email')"
-          >
-            Email
-            <i
-              v-if="getSortIcon('email')"
-              class="material-icons"
-              style="font-size: 1rem"
-              >{{ getSortIcon("email") }}</i
-            >
-          </span>
-          <span
-            class="list-group-item-label d-flex align-items-center gap-1"
-            style="cursor: pointer"
-            @click="handleSort('legal_address')"
-          >
-            Адрес
-            <i
-              v-if="getSortIcon('legal_address')"
-              class="material-icons"
-              style="font-size: 1rem"
-              >{{ getSortIcon("legal_address") }}</i
-            >
-          </span>
-          <span class="list-group-item-label manage"></span>
-        </li>
-        <li
-          v-for="client in legalEntities"
-          :key="client.id ?? client.email ?? client.organization_name"
-          class="list-group-item d-flex justify-content-between align-items-center"
-        >
-          <div
-            class="d-flex flex-row justify-content-around w-100 gap-2 align-items-center"
-          >
-            <span class="list-item">{{
-              client.contact_name ?? "Не указано"
-            }}</span>
-            <span class="list-item">{{
-              client.organization_name ?? "Не указано"
-            }}</span>
-            <span class="list-item">{{
-              client.phone ?? "Телефон не указан"
-            }}</span>
-            <span class="list-item">{{
-              client.email ?? "Email не указан"
-            }}</span>
-            <span class="list-item">{{
-              client.legal_address ?? "Адрес не указан"
-            }}</span>
-          </div>
-          <div class="d-flex align-items-center gap-2">
-            <MaterialButton
-              color="info"
-              variant="outline"
-              size="sm"
-              class="d-inline-flex align-items-center gap-1"
-              @click="handleEditClient(client)"
-            >
-              <i
-                :class="[styles.buttonIcon, 'material-icons']"
-                aria-hidden="true"
-                >edit</i
-              >
-            </MaterialButton>
-            <MaterialButton
-              color="danger"
-              variant="outline"
-              size="sm"
-              class="d-inline-flex align-items-center gap-1"
-              @click="handleDeleteClient(client)"
-            >
-              <i
-                :class="[styles.buttonIcon, 'material-icons']"
-                aria-hidden="true"
-                >delete</i
-              >
-            </MaterialButton>
-          </div>
-        </li>
-      </ul>
+      <AppList v-else :items="legalEntities" :columns="listColumns" :get-sort-icon="getSortIcon"
+        @sort="handleSort" @edit="handleEditClient" @delete="handleDeleteClient" />
       <div class="row">
         <div class="col-12">
           <MaterialPagination
@@ -418,10 +305,6 @@ onMounted(() => getList(1, pageSize.value))
 .subtitle {
   margin: 0.25rem 0 0;
   color: #6c757d;
-}
-
-.buttonIcon {
-  font-size: 1.4rem !important;
 }
 
 .paginationWrapper {

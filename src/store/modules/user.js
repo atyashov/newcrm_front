@@ -1,6 +1,6 @@
 import axios from "axios"
 // import { deleteCookie, getCookie, setCookie } from '@utils/cookies.js';
-import { API, TOKEN_USER_NAME } from "../../api.js"
+import { API, TOKEN_USER_NAME, headers } from "../../api.js"
 
 const API_GET_USER_URL = API + "/user"
 
@@ -28,12 +28,11 @@ const actions = {
         commit("setUser", data)
       })
   },
-  logoutUser() {
-    const token = localStorage.getItem(TOKEN_USER_NAME) || null
-    if (token) {
-      localStorage.removeItem(TOKEN_USER_NAME)
-      return true
-    }
+  logoutUser({ commit }) {
+    localStorage.removeItem(TOKEN_USER_NAME)
+    delete headers.Authorization
+    commit("setUser", {})
+    return true
   },
 }
 const mutations = {

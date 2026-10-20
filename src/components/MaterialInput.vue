@@ -9,6 +9,7 @@
       :name="props.name"
       :value="props.value"
       :placeholder="props.placeholder"
+      :step="props.step"
       :required="props.isRequired"
       :disabled="props.disabled"
       @input="handleInput"
@@ -64,6 +65,10 @@ const props = defineProps({
   type: {
     type: String,
     default: "text",
+  },
+  step: {
+    type: [Number, String],
+    default: undefined,
   },
   isRequired: {
     type: Boolean,

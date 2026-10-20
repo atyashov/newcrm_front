@@ -1,10 +1,13 @@
 <script setup>
+import AppList from "@/components/AppList.vue"
 import { apiDelete } from "@/api"
 import { computed, onMounted, ref, useCssModule, watch } from "vue"
-import MaterialButton from "@/components/MaterialButton.vue"
 import MaterialPagination from "@/components/MaterialPagination.vue"
+import TableSummary from "@/components/TableSummary.vue"
 import Filter from "@/views/components/Filter.vue"
 import { fetchCategories, fetchProducts } from "@/services/productsService"
+import { fetchAllStores } from "@/services/storesService"
+import { productCategoryTitle, productStoreTitle } from "./productListLabels"
 import { useSorting } from "@/views/components/useSorting"
 import { useFiltering } from "@/views/components/useFiltering"
 import { usePagination } from "@/views/components/usePagination"
@@ -26,6 +29,20 @@ const emit = defineEmits(["edit-product"])
 
 const styles = useCssModule()
 const hasLoaded = ref(false)
+const stores = ref([])
+const storesError = ref("")
+const loadStores = async () => {
+  try {
+    stores.value = await fetchAllStores()
+    storesError.value = ""
+  } catch (error) {
+    storesError.value = "Не удалось загрузить названия складов."
+  }
+}
+const priceLabel = (value) => value == null ? "—" : new Intl.NumberFormat("ru-RU", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(value) || 0)
+const quantityLabel = (product) => product.unlimited === true || Number(product.unlimited) === 1
+  ? "Безлимит"
+  : product.quantity == null ? "—" : new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 3 }).format(Number(product.quantity) || 0)
 
 const { toggleSort, getSortIcon, getSortParam } = useSorting()
 const { updateFilters, getFilterParams, clearFilters } = useFiltering()
@@ -111,6 +128,7 @@ const refresh = async () => {
   await Promise.all([
     getList(currentPage.value, pageSize.value),
     getCategoriesList(),
+    loadStores(),
   ])
   hasLoaded.value = true
 }
@@ -137,17 +155,21 @@ const handleDeleteProduct = async (product) => {
     return
   }
 
-  isLoading.value = true
-  const data = await apiDelete(`admin/products/${product.id}`)
-  isLoading.value = false
-
-  if (data.status === true) {
-    products.value = products.value.filter((item) => item.id !== product.id)
-    showSuccess(`Товар ${product.title} успешно удален.`)
-    return
+  try {
+    isLoading.value = true
+    const data = await apiDelete(`admin/products/${product.id}`)
+    if (data.status === true) {
+      const nextPage = products.value.length === 1 && currentPage.value > 1 ? currentPage.value - 1 : currentPage.value
+      await getList(nextPage, pageSize.value)
+      showSuccess(`Товар ${product.title} успешно удален.`)
+      return
+    }
+    showError(data.message ?? "Не удалось удалить позицию. Попробуйте позже.")
+  } catch (error) {
+    showError(error?.response?.data?.message ?? "Не удалось удалить позицию.")
+  } finally {
+    isLoading.value = false
   }
-
-  showError(data.message ?? "Не удалось удалить позицию. Попробуйте позже.")
 }
 
 const handleFilterChange = async (input) => {
@@ -207,6 +229,13 @@ defineExpose({
   refresh,
   categoryOptions,
 })
+const listColumns = [
+  { key: "title", label: "Название", sortable: true, fallback: "Не указано" },
+  { key: "category", label: "Категория", format: (item) => productCategoryTitle(item, categories.value) },
+  { key: "price", label: "Цена", format: (item) => priceLabel(item.price) },
+  { key: "quantity", label: "Количество", format: quantityLabel },
+  { key: "store", label: "Склад", format: (item) => productStoreTitle(item, stores.value) },
+]
 </script>
 
 <template>
@@ -220,6 +249,7 @@ defineExpose({
     <div v-if="categoriesError" class="alert alert-warning" role="alert">
       {{ categoriesError }}
     </div>
+    <p v-if="storesError" class="text-warning">{{ storesError }}</p>
 
     <div v-if="requestSuccess" class="alert alert-success" role="alert">
       {{ requestSuccess }}
@@ -234,68 +264,12 @@ defineExpose({
     </div>
 
     <div v-else>
+      <TableSummary class="mb-2" :pagination="paginationMeta" />
       <p v-if="!products.length" class="text-muted">
         Список пуст. Добавьте товар или загрузите с сайта.
       </p>
-      <ul v-else class="list-group">
-        <li
-          class="list-group-item list-group-header d-flex justify-content-between align-items-center"
-        >
-          <span
-            class="list-group-item-label d-flex align-items-center gap-1"
-            style="cursor: pointer"
-            @click="handleSort('title')"
-          >
-            Название
-            <i
-              v-if="getSortIcon('title')"
-              class="material-icons"
-              style="font-size: 1rem"
-              >{{ getSortIcon("title") }}</i
-            >
-          </span>
-          <span class="list-group-item-label manage"></span>
-        </li>
-        <li
-          v-for="product in products"
-          :key="product.id"
-          class="list-group-item d-flex justify-content-between align-items-center"
-        >
-          <div
-            class="d-flex flex-row justify-content-around w-100 gap-2 align-items-center"
-          >
-            <span class="list-item">{{ product.title ?? "Не указано" }}</span>
-          </div>
-          <div class="d-flex align-items-center gap-2">
-            <MaterialButton
-              color="info"
-              variant="outline"
-              size="sm"
-              class="d-inline-flex align-items-center gap-1"
-              @click="emit('edit-product', product)"
-            >
-              <i
-                :class="[styles.buttonIcon, 'material-icons']"
-                aria-hidden="true"
-                >edit</i
-              >
-            </MaterialButton>
-            <MaterialButton
-              color="danger"
-              variant="outline"
-              size="sm"
-              class="d-inline-flex align-items-center gap-1"
-              @click="handleDeleteProduct(product)"
-            >
-              <i
-                :class="[styles.buttonIcon, 'material-icons']"
-                aria-hidden="true"
-                >delete</i
-              >
-            </MaterialButton>
-          </div>
-        </li>
-      </ul>
+      <AppList v-else :items="products" :columns="listColumns" :get-sort-icon="getSortIcon"
+        @sort="handleSort" @edit="emit('edit-product', $event)" @delete="handleDeleteProduct" />
       <div class="row">
         <div class="col-12">
           <MaterialPagination
@@ -313,10 +287,6 @@ defineExpose({
 </template>
 
 <style module lang="scss">
-.buttonIcon {
-  font-size: 1.4rem !important;
-}
-
 .paginationWrapper {
   margin: 15px 0;
 }

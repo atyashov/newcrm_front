@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, watch, useCssModule } from "vue"
 import MaterialInput from "@/components/MaterialInput.vue"
+import MaterialSelect from "@/components/MaterialSelect.vue"
 
 const props = defineProps({
   inputOptions: {
@@ -42,6 +43,11 @@ const handleFieldChange = (fieldName, value) => {
   filterValues[fieldName] = value
 }
 
+const handleSelectChange = (fieldName, value) => {
+  handleFieldChange(fieldName, value == null ? "" : String(value))
+  handleEmitValues()
+}
+
 const handleEmitValues = () => {
   emit("change", { ...filterValues })
 }
@@ -59,23 +65,15 @@ const handleEmitValues = () => {
         @update:value="(value) => handleFieldChange(input.name, value)"
         @change="handleEmitValues"
       />
-      <select
+      <MaterialSelect
         v-else-if="input.type === 'select'"
         :id="input.name"
-        :value="filterValues[input.name] ?? ''"
-        :placeholder="input.placeholder"
-        class="form-select"
-        @change="(e) => handleFieldChange(input.name, e.target.value)"
-      >
-        <option value="">{{ input.placeholder || "Выберите..." }}</option>
-        <option
-          v-for="option in input.options"
-          :key="option.value"
-          :value="option.value"
-        >
-          {{ option.label }}
-        </option>
-      </select>
+        :model-value="filterValues[input.name] === '' ? null : filterValues[input.name] ?? null"
+        :label="input.placeholder"
+        placeholder="Все"
+        :options="input.options"
+        @update:model-value="(value) => handleSelectChange(input.name, value)"
+      />
     </template>
   </div>
 </template>

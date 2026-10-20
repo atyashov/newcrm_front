@@ -1,9 +1,9 @@
 <template>
     <form class="form-horizontal" @submit.prevent="onSubmit">
         <div class="mb-3">
-            <label for="email" class="form-label">E-mail</label>
-            <input type="text" class="form-control" id="email" v-model="email"
-                   placeholder="Введите почту">
+            <label for="login" class="form-label">Логин</label>
+            <input type="text" class="form-control" id="login" v-model="login" required
+                   placeholder="Введите логин">
         </div>
 
         <div class="mb-3">
@@ -41,14 +41,14 @@ import {onMounted, ref} from "vue";
 import {apiPost, TOKEN_USER_NAME} from "../../api.js";
 // import {setCookie} from "@utils/cookies.js";
 
-const email = ref(''),
+const login = ref(''),
     password = ref(''),
     session_time = ref(60);
 
 let displayPass = ref(false);
 const onSubmit = async () => {
     let result = await apiPost('pub/auths/login', {
-        email: email.value,
+        login: login.value.trim(),
         password: password.value,
         session_time: session_time.value
     });
@@ -59,7 +59,7 @@ const onSubmit = async () => {
             // setCookie(COOKIE_USER_NAME, result.token);
             localStorage.setItem(TOKEN_USER_NAME, result.data.api_token);
             console.log('storage', localStorage.getItem(TOKEN_USER_NAME));
-            location.reload()
+            window.location.assign("/dashboard")
         }, 1000);
     }
 }

@@ -5,6 +5,7 @@ import CreateCategoryModal from "@/components/CreateCategoryModal.vue"
 import CreateProductModal from "../components/CreateProductModal.vue"
 import ProductsTabs from "@/views/components/ProductsTabs.vue"
 import CategoriesTabs from "@/views/components/CategoriesTabs.vue"
+import FetchProductsFromSite from "./FetchProductsFromSite.vue"
 import {
   createCategory,
   updateCategory,
@@ -212,6 +213,12 @@ const handleCategoryModalSubmit = async ({ mode, payload, id }) => {
         :subdivision-id="subdivision"
         :is-active="activeTab === 'categories'"
         @edit-category="handleEditCategory"
+      />
+      <FetchProductsFromSite
+        v-show="activeTab === 'website'"
+        :subdivision-id="subdivision"
+        :is-active="activeTab === 'website'"
+        @create-category="handleOpenCreateCategoryModal"
       />
     </template>
 

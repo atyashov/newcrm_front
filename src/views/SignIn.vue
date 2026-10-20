@@ -42,8 +42,8 @@
                 <div class="mb-3">
                   <material-input
                     id="email"
-                    type="email"
-                    label="Email"
+                    type="text"
+                    label="Логин"
                     name="email"
                   />
                 </div>

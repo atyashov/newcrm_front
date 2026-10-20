@@ -19,24 +19,33 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
+  pageSizeOptions: {
+    type: Array,
+    default: () => [20, 50, 100, 500],
+  },
 })
 
 const emit = defineEmits(["change", "pageSizeChange"])
 const styles = useCssModule()
-const pageSizeOptions = [20, 50, 100, 500]
+const pageSizeOptions = computed(() => {
+  const options = props.pageSizeOptions.map(Number)
+  const actual = Number(props.pagination?.per_page)
+  if (actual > 0 && !options.includes(actual)) options.push(actual)
+  return options.sort((a, b) => a - b)
+})
 
 const selectedPageSize = computed({
   get: () => {
     const pageSize = Number(props.pagination?.per_page)
 
-    return pageSizeOptions.includes(pageSize)
+    return pageSizeOptions.value.includes(pageSize)
       ? String(pageSize)
-      : String(pageSizeOptions[0])
+      : String(pageSizeOptions.value[0])
   },
   set: (value) => {
     const pageSize = Number(value)
 
-    if (!pageSizeOptions.includes(pageSize)) {
+    if (!pageSizeOptions.value.includes(pageSize)) {
       return
     }
 
@@ -159,7 +168,7 @@ const handleItemClick = (item) => {
 </script>
 
 <template>
-  <div :class="styles.container">
+  <div class="material-pagination" :class="styles.container">
     <ul v-if="shouldRender" class="pagination" :class="paginationClasses">
       <MaterialPaginationItem
         prev
@@ -182,6 +191,8 @@ const handleItemClick = (item) => {
     </ul>
     <select
       class="form-select"
+      aria-label="Записей на странице"
+      :disabled="pagination.disabled"
       :class="styles.pageSize"
       v-model="selectedPageSize"
     >

@@ -4,9 +4,12 @@ import Multiselect from "@vueform/multiselect"
 import "@vueform/multiselect/themes/default.css"
 import MaterialButton from "@/components/MaterialButton.vue"
 import MaterialInput from "@/components/MaterialInput.vue"
+import MaterialSelect from "@/components/MaterialSelect.vue"
 import MaterialCheckbox from "./MaterialCheckbox.vue"
-import MaterialTextarea from "./MaterialTextarea.vue"
+import RichTextEditor from "./RichTextEditor.vue"
 import FileManagerModal from "@/components/FileManagerModal.vue"
+import { fetchAllStores } from "@/services/storesService"
+import { imageUrl as serverImageUrl } from "@/utils/outlayDocuments"
 import {
   fetchProductById,
   fetchCategories,
@@ -41,6 +44,7 @@ const emit = defineEmits(["close", "submit"])
 const initialState = {
   title: "",
   category_id: null,
+  store_id: null,
   price: "",
   quantity: "",
   image: null,
@@ -61,12 +65,32 @@ const isCategoryTouched = ref(false)
 const selectedImagePreview = ref("")
 const selectedImageName = ref("")
 const isFileManagerOpen = ref(false)
+const storeOptions = ref([])
+const storeSelectOptions = computed(() => {
+  const options = storeOptions.value.map((entry) => ({ value: Number(entry.id), label: entry.title }))
+  if (formState.store_id != null && !options.some((entry) => entry.value === Number(formState.store_id))) {
+    options.unshift({ value: Number(formState.store_id), label: `Склад №${formState.store_id}` })
+  }
+  return options
+})
+const storesLoading = ref(false)
+const storesError = ref("")
+const loadStores = async () => {
+  storesLoading.value = true
+  storesError.value = ""
+  try {
+    storeOptions.value = await fetchAllStores()
+  } catch (error) {
+    storesError.value = "Не удалось загрузить склады. Сохранённый склад не изменён."
+  } finally {
+    storesLoading.value = false
+  }
+}
 
 const isEditMode = computed(
   () => props.productId !== null && props.productId !== undefined,
 )
 
-const fileBaseUrl = process.env.VUE_APP_FILE_PATH
 
 const isFormDisabled = computed(() => props.isSaving || isProductLoading.value)
 const categoryPlaceholder = computed(
@@ -100,7 +124,7 @@ const syncImageState = (rawImage) => {
       : rawImage?.url ?? rawImage?.preview_url ?? rawImage?.thumbnail_url ?? ""
 
   formState.image = imageValue
-  selectedImagePreview.value = previewUrl || ""
+  selectedImagePreview.value = serverImageUrl(previewUrl)
   selectedImageName.value = imageName || ""
 }
 
@@ -126,8 +150,10 @@ const normalizeProduct = (rawPayload = {}) => {
       payload?.category_name ??
       "",
     price: payload?.price ?? "",
+    storeId: payload?.store_id ?? payload?.store?.id ?? null,
     quantity: payload?.quantity ?? payload?.count ?? "",
     image:
+      (payload?.images?.[0]?.url ? { ...payload.images[0], path: payload.images[0].path ?? payload.image } : null) ??
       payload?.image ??
       payload?.image_path ??
       payload?.image_url ??
@@ -145,6 +171,7 @@ const applyProductData = (payload = {}) => {
   const normalized = normalizeProduct(payload)
   formState.title = normalized.title
   formState.category_id = null
+  formState.store_id = normalized.storeId === null ? null : Number(normalized.storeId)
   formState.price = normalized.price
   formState.quantity = normalized.quantity
   formState.status = normalized.status
@@ -227,6 +254,7 @@ const handleSubmit = () => {
 
   const payload = {
     ...formState,
+    store_id: formState.store_id === null || formState.store_id === "" ? null : Number(formState.store_id),
     category_id: isCategoryTouched.value
       ? formState.category_id?.value ?? null
       : persistedCategoryId.value ?? null,
@@ -334,6 +362,7 @@ const handleClickOutside = () => {
 }
 
 onMounted(() => {
+  if (props.isOpen) loadStores()
   if (isEditMode.value && props.isOpen) {
     loadProduct()
   }
@@ -370,6 +399,7 @@ watch(
   () => props.isOpen,
   (isOpen) => {
     if (isOpen) {
+      loadStores()
       invalidFields.value = new Set()
       if (isEditMode.value) {
         if (props.initialData) {
@@ -469,6 +499,17 @@ watch(
                 </p>
               </div>
               <div class="col-md-6">
+                <MaterialSelect
+                  id="product-store"
+                  v-model="formState.store_id"
+                  label="Склад"
+                  placeholder="Без склада"
+                  :options="storeSelectOptions"
+                  :disabled="isFormDisabled || storesLoading || Boolean(storesError)"
+                />
+                <p v-if="storesError" class="text-warning text-xs mt-1">{{ storesError }} <button type="button" class="btn btn-link p-0 mb-0" @click="loadStores">Повторить</button></p>
+              </div>
+              <div class="col-md-6">
                 <MaterialInput
                   id="product-price"
                   v-model:value="formState.price"
@@ -520,13 +561,13 @@ watch(
                 </MaterialCheckbox>
               </div>
               <div class="col-md-12">
-                <MaterialTextarea
-                  v-model:value="formState.description"
+                <RichTextEditor
+                  v-model="formState.description"
                   name="description"
                   placeholder="Описание"
                   :disabled="isFormDisabled"
                   :error="invalidFields.has('description')"
-                ></MaterialTextarea>
+                />
               </div>
               <div class="col-12">
                 <div class="card border h-100">
@@ -565,7 +606,7 @@ watch(
                       class="product-image-preview img-thumbnail"
                     >
                       <img
-                        :src="fileBaseUrl + '/images/' + selectedImagePreview"
+                        :src="selectedImagePreview"
                         :alt="selectedImageName || 'Изображение товара'"
                       />
                     </div>

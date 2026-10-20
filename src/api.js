@@ -29,10 +29,11 @@ export const apiGet = async (url, params) => {
 }
 
 const handleMutatingRequest = async (requestFn, url, data, options = {}) => {
+  const { notify = true, ...axiosOptions } = options
   try {
     const requestConfig = {
       ...config,
-      ...options,
+      ...axiosOptions,
       headers: {
         ...config.headers,
         ...(options.headers ?? {}),
@@ -51,13 +52,13 @@ const handleMutatingRequest = async (requestFn, url, data, options = {}) => {
     if (responseData.status === false || responseData.error) {
       const message =
         responseData.error || responseData.message || "Произошла ошибка"
-      showError(message)
+      if (notify) showError(message)
       return responseData
     }
 
     // Успешный ответ (HTTP 2xx и нет флага ошибки)
     const message = responseData.message || "Операция выполнена успешно"
-    showSuccess(message)
+    if (notify) showSuccess(message)
     return responseData
   } catch (error) {
     const errorMessage =
@@ -65,17 +66,17 @@ const handleMutatingRequest = async (requestFn, url, data, options = {}) => {
       error.response?.data?.error ||
       error.message ||
       "Сетевая ошибка"
-    showError(errorMessage)
+    if (notify) showError(errorMessage)
     throw error
   }
 }
 
-export const apiPost = async (url, data) => {
-  return handleMutatingRequest(axios.post, url, data)
+export const apiPost = async (url, data, options = {}) => {
+  return handleMutatingRequest(axios.post, url, data, options)
 }
 
-export const apiPatch = async (url, data) => {
-  return handleMutatingRequest(axios.patch, url, data)
+export const apiPatch = async (url, data, options = {}) => {
+  return handleMutatingRequest(axios.patch, url, data, options)
 }
 
 export const apiPut = async (url, data) => {

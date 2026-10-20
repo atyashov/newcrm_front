@@ -1,10 +1,11 @@
 <script setup>
+import AppList from "@/components/AppList.vue"
 import { fetchPerms } from "../services/permsService"
 import { useDataList } from "./components/useDataList"
 import { fetchManageMenu } from "../services/menuService"
 import { updateMenuPerms } from "../services/menuPermsService"
 import { onMounted, ref } from "vue"
-import MaterialButton from "../components/MaterialButton.vue"
+import TableSummary from "@/components/TableSummary.vue"
 import MaterialBadge from "../components/MaterialBadge.vue"
 import UpdateMenuAccessModal from "../components/UpdateMenuAccessModal.vue"
 import MaterialSnackbar from "../components/MaterialSnackbar.vue"
@@ -90,6 +91,7 @@ onMounted(async () => {
     <h1>Доступы к пунктам меню</h1>
   </header>
   <section>
+    <TableSummary v-if="!isMenusLoading" class="mb-2" :pagination="{ total: menus.length, per_page: Math.max(1, menus.length), current_page: 1 }" />
     <div v-if="isMenusLoading" class="text-center py-4">
       <span
         class="spinner-border text-success"
@@ -99,37 +101,9 @@ onMounted(async () => {
     </div>
     <p v-else-if="!menus.length" class="text-muted">Ничего не найдено.</p>
 
-    <ul v-else class="list-group">
-      <li
-        v-for="(menu, index) in menus"
-        :key="index"
-        class="list-group-item d-flex justify-content-between align-items-center"
-      >
-        <span class="list-item">{{ menu.title }}</span>
-        <span class="list-item">
-          <material-badge
-            v-for="(perm, permIndex) in menu.perms ?? []"
-            :key="permIndex"
-            color="success"
-            variant="gradient"
-            size="sm"
-            >{{ perm.title }}</material-badge
-          >
-        </span>
-
-        <div class="d-flex align-items-center gap-2">
-          <MaterialButton
-            color="info"
-            variant="outline"
-            size="sm"
-            class="d-inline-flex align-items-center gap-1"
-            @click="handleEditMenu(menu)"
-          >
-            <i class="buttonIcon material-icons" aria-hidden="true">edit</i>
-          </MaterialButton>
-        </div>
-      </li>
-    </ul>
+    <AppList v-else :items="menus" :columns="[{ key: 'title', label: 'Название' }, { key: 'perms', label: 'Разрешения' }]" :remove="false" @edit="handleEditMenu">
+      <template #cell-perms="{ item }"><material-badge v-for="perm in item.perms ?? []" :key="perm.id ?? perm.title" color="success" variant="gradient" size="sm">{{ perm.title }}</material-badge></template>
+    </AppList>
   </section>
   <UpdateMenuAccessModal
     :is-open="modalIsOpen"
@@ -139,14 +113,3 @@ onMounted(async () => {
     @submit="handleModalSubmit"
   />
 </template>
-
-<style scoped>
-.list-group-item {
-  :first-child {
-    white-space: nowrap;
-  }
-}
-.list-item {
-  width: fit-content;
-}
-</style>

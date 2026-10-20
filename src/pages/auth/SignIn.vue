@@ -22,13 +22,15 @@
             </div>
             <div class="card-body">
               <form role="form" class="text-start mt-3" @submit.prevent="onSubmit">
+                <p v-if="loginError" class="text-danger text-sm login-error" role="alert">{{ loginError }}</p>
                 <div class="mb-3">
                   <material-input
-                    id="email"
-                    type="email"
-                    label="Email"
-                    name="email"
-                    v-model:value="email"
+                    id="login"
+                    type="text"
+                    label="Логин"
+                    name="login"
+                    isRequired
+                    v-model:value="login"
                   />
                 </div>
                 <div class="mb-3">
@@ -37,6 +39,7 @@
                     type="password"
                     label="Пароль"
                     name="password"
+                    isRequired
                     v-model:value="password"
                   />
                 </div>
@@ -46,7 +49,9 @@
                     variant="gradient"
                     color="success"
                     fullWidth
-                    >Войти</material-button
+                    type="submit"
+                    :disabled="isSubmitting"
+                    >{{ isSubmitting ? 'Вход…' : 'Войти' }}</material-button
                   >
                 </div>
               </form>
@@ -69,40 +74,49 @@ import { mapMutations } from "vuex";
 
 import {ref} from "vue";
 import {apiPost, TOKEN_USER_NAME} from "../../api.js";
+import { authErrorMessage } from "@/utils/authError";
 
 export default {
   name: "sign-in",
   setup() {
-    const email = ref(''),
+    const login = ref(''),
         password = ref(''),
         session_time = ref(60);
+    const loginError = ref('');
+    const isSubmitting = ref(false);
 
     const onSubmit = async () => {
+      if (isSubmitting.value) return;
+      loginError.value = '';
+      isSubmitting.value = true;
       try {
         let result = await apiPost('pub/auths/login', {
-            email: email.value,
+            login: login.value.trim(),
             password: password.value,
             session_time: session_time.value
-        });
+        }, { notify: false });
 
-        if (result.status === true && result.data.api_token) {
-            console.log(result);
-            setTimeout(() => {
-                // setCookie(COOKIE_USER_NAME, result.token);
-                localStorage.setItem(TOKEN_USER_NAME, result.data.api_token);
-                console.log('storage', localStorage.getItem(TOKEN_USER_NAME));
-                location.reload()
-            }, 1000);
+        if (result.status === true && result.data?.api_token) {
+            localStorage.setItem(TOKEN_USER_NAME, result.data.api_token);
+            window.location.assign("/dashboard");
+        } else {
+            loginError.value = authErrorMessage(result);
         }
       } catch (error) {
-        console.error('Error during form submission:', error);
+        loginError.value = error.response
+          ? authErrorMessage(error.response.data)
+          : 'Не удалось связаться с сервером. Проверьте подключение и попробуйте снова.';
+      } finally {
+        isSubmitting.value = false;
       }
     }
 
     return {
-      email,
+      login,
       password,
       session_time,
+      loginError,
+      isSubmitting,
       onSubmit
     }
   },
@@ -123,3 +137,7 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.login-error { white-space: pre-line; }
+</style>
